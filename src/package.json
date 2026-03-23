@@ -1,0 +1,19 @@
+{
+  "name": "src",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "discord.js": "^14.25.1",
+    "expr-eval": "^2.0.2",
+    "fuse.js": "^7.1.0",
+    "mathjs": "^15.1.1",
+    "ollama": "^0.6.3"
+  }
+}
