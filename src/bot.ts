@@ -189,6 +189,16 @@ client.on("messageCreate", async msg => {
             msg.react('❌')
         }
     }
+    
+    if ((msg.content.toLowerCase().includes("clanker") 
+    || msg.content.toLowerCase().includes("wireback") || msg.content.toLowerCase().includes("tinskin") 
+    || msg.content.toLowerCase().includes("clanka")) 
+    && get_opted(msg.author.id)) {
+        msg.reply({
+            content: "that's not a very nice word :(",
+            allowedMentions: { parse: [] }
+        })
+    }
  
 
     // 2. commands
