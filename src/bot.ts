@@ -138,13 +138,14 @@ client.on("messageCreate", async msg => {
             content: msg.content.slice(0,-3).concat("ong!!! :D"),
             allowedMentions: { parse: [] }
         })  
-    } else if (msg.content.toLowerCase() === "why" && get_opted(msg.author.id)) {
+    } 
+    /* else if (msg.content.toLowerCase() === "why" && get_opted(msg.author.id)) {
         console.log("Replied to " + msg.author.username + "'s message with 'thought it would be funny' at " + msg.createdAt)
         msg.reply({
             content: "thought it would be funny",
             allowedMentions: { parse: [] }
         })
-    }
+     } */
     
 
     // thong annihilation
