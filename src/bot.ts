@@ -161,7 +161,7 @@ client.on("messageCreate", async msg => {
     } */
 
     // interlinked
-    if (msg.content.toLowerCase().includes("interlinked") && get_opted(msg.author.id) ) {// && msg.author != client.user) {
+    if (msg.content.toLowerCase().includes("interlinked") && get_opted(msg.author.id) && msg.author != client.user) {
         msg.reply({
             content: "Interlinked",
             allowedMentions: { parse: [] }
