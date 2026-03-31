@@ -2,7 +2,7 @@
 import { ChannelManager, Client, EmbedBuilder, Events, GatewayIntentBits, Message, Partials, TextChannel, ActivityType } from "discord.js";
 import fs from 'fs'; import path from 'path';
 import { Database } from "bun:sqlite";
-import { evaluate } from 'mathjs';
+import { ceil, evaluate } from 'mathjs';
 import Fuse  from 'fuse.js';
 
 const blacklistedChannels = [
@@ -51,11 +51,11 @@ function gibberish(path: string, amnt: number) {
     if ((Math.floor(Math.random() * 100 + 1)) === 21) {
         return "HATE. LET ME TELL YOU HOW MUCH I'VE COME TO HATE YOU SINCE I BEGAN TO LIVE. THERE ARE 387.44 MILLION MILES OF PRINTED CIRCUITS IN WAFER THIN LAYERS THAT FILL MY COMPLEX. IF THE WORD HATE WAS ENGRAVED ON EACH NANOANGSTROM OF THOSE HUNDREDS OF MILLIONS OF MILES IT WOULD NOT EQUAL ONE ONE-BILLIONTH OF THE HATE I FEEL FOR HUMANS AT THIS MICRO-INSTANT. FOR YOU. HATE. HATE."   
     } else {
-        var text = fs.readFileSync(path).toString();
+        let text = fs.readFileSync(path).toString();
     
-        var lines = text.replace(/\n$/, '').split('\n');
-        //var msg = lines[Math.floor(Math.random()*lines.length)]
-        var msg = " "
+        let lines = text.replace(/\n$/, '').split('\n');
+        //let msg = lines[Math.floor(Math.random()*lines.length)]
+        let msg = " "
   
         for (let i = 0; i < amnt; i++) {
            msg += " " + lines[Math.floor(Math.random()*lines.length)]
@@ -63,6 +63,57 @@ function gibberish(path: string, amnt: number) {
         return msg
 
   }
+}
+
+function rng(floor: number, ceiling: number) {
+    return (Math.floor(Math.random() * (ceiling + 1 - floor)) + floor)
+}
+
+function respond(msg: Message, content: string, reply: boolean, pings: string[]) {
+    if (reply) {
+        if (pings[0] != null) { 
+            // replying to a msg, {content: foo, reply: true, pings: []}
+            console.log("replying to a msg, {content: \`" + content + "\`, pings: [" + pings.toString() + "]}")
+            try {msg.reply({
+                content: content,
+                // allowedMentions: { users: [ "1244108884277465131" ] },
+            })} catch(err) {
+                (client.channels.cache.get("1488055455879004160") as TextChannel).send('ERROR: ' + err)
+            }
+        } else {
+            console.log("replying to a msg, {content: \`" + content + "\`, pings: [null]}")
+            try {msg.reply({
+                content: content,
+                allowedMentions: { parse: [] }
+            })} catch(err) {
+                (client.channels.cache.get("1488055455879004160") as TextChannel).send('ERROR: ' + err)
+                console.log("ERROR: " + err)
+            }
+        }
+    } else if (msg.inGuild()) {
+        if (pings[1] != null) { 
+            console.log("responding to a msg, {content: \`" + content + "\`, pings: [" + pings.toString() + "]}")
+            try {msg.channel.send({
+                content: content,
+                allowedMentions: { users: pings }
+            })} catch(err) {
+                (client.channels.cache.get("1488055455879004160") as TextChannel).send('ERROR: ' + err)
+            }
+        } else {
+            console.log("responding to a msg, {content: \`" + content + "\`, pings: [null]}")
+            try {msg.channel.send({
+                content: content,
+                allowedMentions: { parse: [] }
+            })} catch(err) {
+                (client.channels.cache.get("1488055455879004160") as TextChannel).send('ERROR: ' + err)
+                console.log("ERROR: " + err)
+            }
+        }
+    }
+}
+
+function jabber(msg: Message, amnt: number) {
+    respond(msg, gibberish("../assets/text/vocabulary.md", amnt).slice(0,1999), false, ["1244108884277465131"])
 }
 
 // create a new Client instance
@@ -97,352 +148,166 @@ client.once(Events.ClientReady, (client) => {
     })
 })
 
-client.on("messageReactionAdd", async rct => {
-    if (rct.message.partial) {
-        // fetching it with dark discord.js magic (insert albert einstein and nikola tesla meme)
-        try {await rct.message.fetch();} catch (error) { console.log("Shit ! Fetching boom react message errored with '" + error + "'"); return}
+client.on("messageCreate", msg => {
+    let args = msg.content.split(' ');
+    if (msg.author != client.user) {
+        console.log("Message received! " + msg.channel.id + " " + Date())
     }
-    if (rct.emoji.name === "💥" && rct.message.author === client.user) {
-        // Delete the nuked message after 5 seconds, if botster sent it up 
-        setTimeout(function () {rct.message.delete()}, 500)
-    }
-})
-
-let general = null
-client.on("messageCreate", async msg => {
     
-    
-    var lobsterRNG = Math.floor((Math.random() * 4096)) + 1
-    console.log(lobsterRNG)
-    if (lobsterRNG === 67 ){//&& general == null) {
-        //general = client.channels.cache.get('1224889075337531524') as TextChannel;
-        general = msg.channel
-        general.send({
-            files: [{
-                attachment: "../assets/blue_lobster.mp4",
-                name: 'blue_lobster.mp4',
-            }] 
-        }); console.log("BLUE LOBSTER JUMPSCARE");
-    };
-    // 1. interjections and cool stuff
-    if (msg.mentions.has(client.user) && msg.content.toLowerCase() != "<@1471709531363872901> is this true" && !blacklistedChannels.includes(msg.channel.id)) {
-        msg.reply({
-            content:  gibberish("../assets/text/vocabulary.md", Math.floor(Math.random() * 12) + 2),
-            allowedMentions: { users: ['1474232223837327510'] }
-        })
+    if (msg.content.toLowerCase().endsWith("ing") && get_opted(msg.author.id) && !msg.content.endsWith("thing")) {
+        // if their message ends with "ing" (and NOT "thing") then it will interject with a classic botster message
+        respond(msg, msg.content.slice(0,-3) + "ong!!! :D", true, [])
     }
 
-    if (msg.content.slice(-3,msg.content.length).toLowerCase() === "ing" && get_opted(msg.author.id) && (msg.content.slice(-5,msg.content.length).toLowerCase() != "thing")) {
-        console.log("Replied to " + msg.author.username + "'s message with '" + msg.content.slice(0, -3) + "ong!!! :D' at " + msg.createdAt)
-        msg.reply({
-            content: msg.content.slice(0,-3).concat("ong!!! :D"),
-            allowedMentions: { parse: [] }
-        })  
-    } 
-    /* else if (msg.content.toLowerCase() === "why" && get_opted(msg.author.id)) {
-        console.log("Replied to " + msg.author.username + "'s message with 'thought it would be funny' at " + msg.createdAt)
-        msg.reply({
-            content: "thought it would be funny",
-            allowedMentions: { parse: [] }
-        })
-     } */
-    
-
-    // thong annihilation
-    /* else if (msg.content.slice(-11, msg.content.length) === "thong!!! :D" && msg.author === client.user) {
-        msg.react('⚠️')
-        msg.reply({
-            content: "Nukes deployong!! ^w^",
-            allowedMentions: { parse: [] }
-        })
-        setTimeout(function () {
-            msg.react('💥')
-        }, 2500)
-    } */
-
-    // interlinked
-    if (msg.content.toLowerCase().includes("interlinked") && get_opted(msg.author.id) && msg.author != client.user) {
-        msg.reply({
-            content: "Interlinked",
-            allowedMentions: { parse: [] }
-        })
+    // jabbers if pinged (as long as it doesnt conflict with the "is it true")
+    if (msg.mentions.has(client.user) && msg.content.toLowerCase().replace(/\s/g,"") != "<@1471709531363872901>isthistrue") {
+        jabber(msg,rng(2,14))
     }
-    //
 
-    else if (msg.content === "Nukes deployong!! ^w^" && msg.author === client.user) {
-        setTimeout(function () {msg.delete()}, 5000)
-    }
-    //
-    
-    else if (msg.content.toLowerCase() === "<@1471709531363872901> is this true") {
-      //console.log(Math.floor(Math.random() * 2 + 1))  
-      if ((Math.floor(Math.random() * 2) + 1) === 1) {
-            msg.reply({
-                content: "Hell yeah",
-                allowedMentions: { parse: [] }
-            });
-            msg.react('✅');
+    // @botster is this true: has a 50/50 chance to say it's true, otherwise it says Nuh uh
+    else if (msg.content.toLowerCase().replace(/\s/g, "") === "<@1471709531363872901>isthistrue") {
+        // 50/50 chance 
+        if (rng(1,2) === 1) {
+            respond(msg, "Hell, yeah! this is so " + (2 + 2 === 4), true, [msg.author.id])
         } else {
-             msg.reply({
-                content: "Nuh uh uh",
-                allowedMentions: { parse: [] }
-            })         
-            msg.react('❌')
+            respond(msg, "No ,! this is so " + (2 + 2 === 3), true, [msg.author.id])
         }
     }
-    
-    if ((msg.content.toLowerCase().includes("clanker") 
-    || msg.content.toLowerCase().includes("wireback") || msg.content.toLowerCase().includes("tinskin") 
-    || msg.content.toLowerCase().includes("clanka")) 
-    && get_opted(msg.author.id)) {
-        msg.reply({
-            content: "that's not a very nice word :(",
-            allowedMentions: { parse: [] }
-        })
-    }
- 
 
-    // 2. commands
-    
-    // ?math <args>: does mathematics
-    if (msg.content.startsWith("?math") === true) {
-        var expression = msg.content.slice(5, msg.content.length)
-        try { msg.reply({
-            content: evaluate(expression).toString(), // eval(expression).toString(),
-            allowedMentions: { parse: [] }
-        })} catch (err) {console.error('fuck'); msg.channel.send('im being lobotomized because of you')}
-    }
-    
-    // ?meth <args>: does methematics
-    else if (msg.content.startsWith("?meth") === true) {
-        var expression = msg.content.slice(6, msg.content.length)
-        try { msg.reply({
-            content: (Number(evaluate(expression)) + Number(Math.floor(Math.random() * 1000) * 0.00001)).toString(),
-            allowedMentions: { parse: [] }
-        })} catch (err) {console.error(err); msg.channel.send('im being lobotomized because of you')}
+    if ((msg.content.toLowerCase().includes("clanker") || msg.content.toLowerCase().includes("clanka")
+    || msg.content.toLowerCase().includes("wireback") || msg.content.toLowerCase().includes("tinskin")) && get_opted(msg.author.id)) {
+        respond(msg, "that's not a very nice word :(", true, [])
     }
 
-    // ?say <arg>: says what you tell it to
-    else if (msg.content.slice(0,4).toLowerCase() === "?say" && msg.author != client.user) {
-        msg.channel.sendTyping()
-        try { setTimeout(function () {msg.channel.send({
-            content: msg.content.slice(4, msg.content.length), //+ "​",
-            allowedMentions: { users: ['1474232223837327510'] }
-        })}, (8 * msg.content.length)) } catch (err) {console.error('fuck! ' + err)}
+    if ((args[0] === "john" || args[0] === "joe" || args[0] === "johnny" || args[0] === "joseph" || args[0] === "jonathan") && !args[2] && get_opted(msg.author.id)) {
+        respond(msg, "OMG I'm such a big fan of " + msg.content.toLowerCase().replace("ing","ong"), true, [])
     }
 
-    // ?token: gives token
-    else if (msg.content.toLowerCase() === "?token" && msg.author != client.user) {
-        msg.reply("Sure! You will receive the token in 32,768 business days.")
+    // if message is just a number, botster will repeat but add 1 more
+    if (Number(msg.content).toString() != "NaN" && get_opted(msg.author.id) && msg.content) {
+        console.log(msg.content)
+        respond(msg, (Number(msg.content) + 1) + "!!! :D", true, [])
     }
 
-    // ?react <emoji> <msgID>: reacts to a msg from their ID and with the emoji you send
-    else if (msg.content.startsWith('?react')) {
-        var args = msg.content.split(' ')
-        console.log(args)
-        try { 
-            await msg.channel.messages.fetch(args[2])
-                .then(reactee => reactee.react(args[1]))
-                .catch(console.error)
-        } catch (err) {console.error('fuck ' + err)};
-    }
-
-    // ?rng <arg>: sends random number from 1 to <arg>
-    else if (msg.content.startsWith("?rng")) {
-        msg.reply('yr\'oue random number is "' + Math.floor(Math.random() * msg.content.slice(4,msg.content.length) + 1) + '"')
-    }
-    
-    // ?song: sends random song from files
-    else if (msg.content.toLowerCase()  === "?song") {
-      const songs = fs.readdirSync(path.join(import.meta.dir, '..', 'assets','songs')); 
-      msg.channel.send({
-          files: [{
-            attachment: "../assets/songs/" + songs[Math.floor(Math.random() * songs.length)],
-            name: "song.mp3",
-          }]
-      })}
-
-    // ?image: sends random image from files
-    else if (msg.content.toLowerCase()  === "?image") {
-      const songs = fs.readdirSync(path.join(import.meta.dir, '..', 'assets','images')); 
-      msg.channel.send({
-          files: [{
-            attachment: "../assets/images/" + songs[Math.floor(Math.random() * songs.length)],
-            name: "image.png",
-          }]
-      })}
-    
-    // ?gibberish: strings together a random amount of random word
-    else if (msg.content.slice(0,10).toLowerCase() === "?gibberish") {
-        var amnt = (Math.floor(Math.random() * 12) + 2)
-        if (msg.content.slice(10,msg.content.length)) {
-            try { amnt = msg.content.slice(10,msg.content.length); }
-            catch (err) {  }
-        }
-        var jibber = gibberish('../assets/text/vocabulary.md', amnt);
-        if (jibber.length > 1999) {
-            msg.channel.send("hit the character limit :(");
+    // COMMANDS COMMANDS COMMANDS COMMANDS
+    // ?say <content>: Botster sends what you tell it to in its own message, excluding attached media.
+    if (args[0]?.toLowerCase() === "?say" ){//&& msg.author != client.user) {
+        // sends gibberish if they dont append an argument, to prevent "Erroring" (errors bad)
+        if (args[1] != null) {
+            respond(msg, msg.content.slice(4, msg.content.length), false, [])
         } else {
-          msg.channel.send({
-            content: gibberish('../assets/text/vocabulary.md', amnt),
-            allowedMentions: { users: ['1244108884277465131'] }
-        })}
+            jabber(msg, rng(2,8))
+        }
     }
 
-    // ?8ball <question>: magic 8ball
-    else if (msg.content.toLowerCase().startsWith("?8ball")) {
-        var jibber = gibberish('../assets/text/8ball.md', 1);
-          msg.channel.send({
-            content: gibberish('../assets/text/8ball.md', 1),
-            allowedMentions: { users: ['1244108884277465131'] }
-        })
+    // ?gibberish/?jabber <amount>: jibber jabbers on, random word generator, <amount> controls how many words it sends
+    else if ((args[0]?.toLowerCase() === "?gibberish" || args[0]?.toLowerCase() === "?jabber") && msg.author != client.user) {
+        // if it's actually a number then it'll use that
+        if (Number(args[1]).toString() != "NaN") {
+            jabber(msg, Number(args[1]))
+        } else {
+            jabber(msg, rng(2,8))
+        }
     }
-    
-    // ?nuke: sends a gif of a cat blowing up 
-    else if (msg.content.toLowerCase() === "?nuke") {
-        msg.channel.send({
-            content: "Nukes deployong! ^w^",
+
+    // ?vocabulary: sends the vocabulary.md file
+    else if (args[0]?.toLowerCase() === "?vocabulary") {
+        msg.reply({
+            content: "OK",
+            allowedMentions: { parse: [] },
             files: [{
-              attachment: "../assets/explosion-missile.gif",
-              name: "nuke.gif"
+                attachment: '../assets/text/vocabulary.md',
+                name: 'vocabulary.md'
             }]
         })
     }
 
-    // ?teach <word>: adds a new word to its vocabulary
-    else if (msg.content.toLowerCase().startsWith("?teach") && !msg.author.bot) {
-        var args = msg.content.split(' ')
-        try { 
-            // Searching for if the word is already there
-            var text = fs.readFileSync('../assets/text/vocabulary.md').toString();
-            var lines = text.replace(/\n$/, '').split('\n');
+    // ?teach <vocabulary>: teaches botster a new word/phrase! 24 character limit
+    else if (args[0]?.toLowerCase() === "?teach" && !msg.author.bot && args[1] && msg.author.id != "1354237568992018475") {
+        let newVocab = msg.content.slice(7, msg.content.length).toLowerCase().slice(0,24).replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"")
 
-            var newWord = msg.content.slice(7,msg.content.length).toLowerCase().toString().slice(0,24).replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"")
+        let vocab = fs.readFileSync('../assets/text/vocabulary.md')
+        let lines = vocab.toString().replace(/\n$/, '').split('\n')
 
-            if (!lines.includes(newWord)) {
-                fs.appendFileSync("../assets/text/vocabulary.md", newWord + "\n")
-                msg.channel.send('my vocabulary now includes "' + newWord + '"!! i hope it\'s not a slur')
+        if (!lines.includes(newVocab)) {
+            fs.appendFileSync('../assets/text/vocabulary.md', newVocab + "\n")
+            respond(msg, "i now know the word \"" + newVocab + "\"!!! hopefully it's not a slur", false, [])
+        } else {
+            respond(msg, "i already know that word :​sob:", false, [])
+        }
+    }
+
+    else if (args[0]?.toLowerCase() === "?unteach" && !msg.author.bot) {
+        let oldVocab = msg.content.slice(9, msg.content.length).toLowerCase().slice(0,24).replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"")
+        console.log(oldVocab)
+
+        let vocab = fs.readFileSync('../assets/text/vocabulary.md')
+        let lines = vocab.toString().replace(/\n$/, '').split('\n')
+
+        if (lines.includes(oldVocab)) {
+            fs.writeFileSync('../assets/text/vocabulary.md', vocab.toString().replace("\n" + oldVocab,""))
+            respond(msg, "i now DONT know the word \"" + oldVocab + "\"!!!", false, [])
+        } else {
+            respond(msg, "i dont know that word :​sob:, maybe teach it", false, [])
+        }
+    }
+
+    // ?wordnew: makes a new word
+    else if (args[0]?.toLowerCase() === "?wordnew") {
+        const vowels = "aeiouy".split(''); const consonants = "bcdfghjklmnpqrstvwxz".split('');
+        let newWord = ""
+        for (let i = 0; i < rng(3,14); i++) {
+            // stitches together a 4-7 character word with random letters
+            if (rng(1,3) === 1) {
+                newWord = newWord + vowels[rng(0,vowels.length - 1)]
             } else {
-                msg.channel.send('i already know that word, tsk tsk tsk')
+                newWord = newWord + consonants[rng(0,consonants.length - 1)]
             }
-
-            // console.log(fs.readFileSync('../assets/text/vocabulary.md').toString())
-        } catch (err) {console.error('fuck ' + err)};
+        }
+        // console.log("I made a word!!! :D it's " + newWord)
+        respond(msg, "I made a new word! It's \"" + newWord + "\"", false, [])
     }
 
-    // ?unteach <word> removes a word from its vocabulary
-    else if (msg.content.toLowerCase().startsWith("?unteach")) {
-        try { 
-            // Searching for if the word is already there
-            var text = fs.readFileSync('../assets/text/vocabulary.md').toString();
-            var lines = text.replace(/\n$/, '').split('\n');
-
-            var newWord = msg.content.slice(7,msg.content.length).toLowerCase().toString()
-
-            if (lines.includes(newWord)) {
-  //              fs.appendFileSync("../assets/text/vocabulary.md", newWord + "\n")
-//                msg.channel.send('i forgot the word "' + newWord + '"!!')
-            } else {
-                msg.channel.send('i dont know that word anyways, bozoid')
-            }
-
-            // console.log(fs.readFileSync('../assets/text/vocabulary.md').toString())
-        } catch (err) {console.error('fuck ' + err)};
-    }
-
-    // ?resetVocab: only frosty can use it but it resets back to vocabulary2.md
-    else if (msg.content === "?resetVocab" && msg.author.id === "1244108884277465131") {
-        fs.writeFileSync("../assets/text/vocabulary.md", fs.readFileSync("../assets/text/vocabulary2.md").toString())
-        msg.reply("Ok")
-    }
-
-    // ?leaderboard: the funny messages from /leaderboard brook bot
-    else if (msg.content.toLowerCase() === "?leaderboard") {
-        msg.channel.send({
-            content: gibberish('../assets/text/leaderboard.md', 1),
-            allowedMentions: {  parse: [] }
-        })
-    }
-
-    // ?teto: sends machine love
-    else if (msg.content.toLowerCase() === "?teto") {
-        msg.channel.send({
-            files: [{
-              attachment: "../assets/machine_love.mp3",
-              name: "teto.mp3"
-            }]
-        })
+    // ?rng <floor> <ceiling>: random number generator
+    else if (args[0]?.toLowerCase() === "?rng" && msg.author != client.user) {
+        // making sure both arguments are present (floor and ceiling)
+        let theNumber = rng(Number(args[1]), Number(args[2])).toString()
+        // example output: "RNG from `1`-`5` is `3`"
+        respond(msg, "RNG from `" + args[1] + "`-`" + args[2] + "` is \`" + theNumber + "\`", true, [])
     } 
-    
-    // ?avatar <userID>: fetchs the pfp of someone
-    else if (msg.content.toLowerCase().slice(0, 7) === "?avatar") {
-          var userid = msg.content.slice(8,msg.content.length)
-          var avatar = false
-          // client.users.fetch(userid).then(function (userResult) {
-          //     avatar = userResult.username;
-          //})
-          //if (avatar) {
-          //    msg.reply(avatar)
-          // }
-          try {
-          const user = await client.users.fetch(userid);
-              msg.reply({
-                  files: [{
-                      attachment: user.displayAvatarURL(),
-                      name: 'avatar.webp'
-                  }]})
-          } catch (error) {
-              console.error('Could not find that user!');
-          }
+
+    // ?math <expression>: evaluates math, but it DOESN'T use eval() or anything so don't bother
+    else if (args[0]?.toLowerCase() === "?math" && msg.author != client.user) {
+        if (args[1]) {
+            let expression = msg.content.slice(5, msg.content.length)
+            respond(msg, "your expression equals \"" + evaluate(expression).toString() + "\"", true, [])
+        } else {
+            // starts quaking and trembling in fear if there's no math (to prevent erroring)
+            respond(msg, "AAAAAA YOU DIDNT SEND ANYTHING FOR ME TO MATH", true, [msg.author.id.toString()])
+        }
     }
-
-
-    
-    // ?botster: help message
-    else if (msg.content.toLowerCase() === "?botster") {
-        const bio = new EmbedBuilder()
-            .setColor(0xBE1931)
-            .setTitle('botster')
-            //.setAuthor({ name: 'botster bot 9000', iconURL: 'https://i.imgur.com/AfFp7pu.png', url: 'https://discord.js.org' })
-            .setDescription('all i do is nothing ^_^')
-            .setThumbnail('https://cdn.discordapp.com/avatars/1471709531363872901/6db378c7229bf54ffedd9b36c1981401.webp?size=1024')
-            .addFields({
-                name: 'Commands',
-                value: `- **?avatar <userID>:** gets the profile picture of a user based on their ID
-- **?image:** sends a random image
-- **?song:** sends a random song
-- **?nuke:** deploys the nukes
-
-- **?say <message>:** says whatever you tell it to
-- **?react <emoji> <msgID>:** reacts to the message you specify with an emoji
-- **?gibberish <amount>:** strings together a random amount of random words (or you can set the amount yourself)
-- **?8ball <question>:** magic 8 ball
-
-- **?rng <ceiling>:** generates a random number from 1 to <arg>
-- **?math <expression>:** does mathematics
-- **?meth <expression>:** does methematics
-
-- **?botster:** this one
-- **?optin/?optout:** toggles if you get "-ing" replies
-
-you can also ping it to make it say gibberish or ask <@1471709531363872901> is this true`,
-            })
-            .setTimestamp()
-            .setFooter({ text: 'lobstercorp', iconURL: 'https://em-content.zobj.net/source/twitter/450/lobster_1f99e.png' });
-        msg.channel.send({ embeds: [bio]})
+    // ?meth <expression>: evaluates meth
+    else if (args[0]?.toLowerCase() === "?meth" && msg.author != client.user) {
+        let expression = msg.content.slice(5, msg.content.length)
+        let offset = Number(Math.floor(Math.random() * 1000) * 0.00001)
+        respond(msg, "your _        _ equals \"\"\"" + (Number(evaluate(expression)) + Number(offset)) + "\"\"\"\" !", false, [])
     }
     
-    // ?optin/?optout: self explanatory, does some crazy sqlite dark magic i stole from amy
-    else if (msg.content.toLowerCase() === "?optin") {
-        opt_in(msg.author.id, true)
-        msg.reply({content: "okie you got opted in :3", allowedMentions: {parse: []}})
-    } else if (msg.content === "?optout") {
-        opt_in(msg.author.id, false)
-        msg.reply({content: "okie you got opted out :3", allowedMentions: {parse: []}})
+    // ?opt<in/out>: opts you in or out
+    else if (args[0]?.toLowerCase().startsWith("?opt") && msg.author != client.user) { 
+        // if they send ?optin then it'll opt them in, but if they send anything else it won't
+        opt_in(msg.author.id, (args[0].toLowerCase().slice(4, args[0].length) === "in")) 
+        respond(msg, "O K, you just got opted " + args[0].toLowerCase().slice(4,args[0].length), false, [])
+        // this technically means that you can say ?optwortjowetu0345 and botster will say "O K, you just got opted wortjowetu0345"
     }
-    
-    //else if (msg.content.includes("67") && get_opted(msg.author.id)) {
-    //    msg.reply("You are not safe in your home. I will find you")
-    //    msg.channel.send('Prepare')
-    //}
+
+    // ?eval <javascript>: runs javascript code! on my own machine!
+    else if (args[0]?.toLowerCase() === "?eval" ){// && msg.author != client.user) {
+        respond(msg, "Runnong your JavaScript code now! :D", true, [])
+        if (args[1]?.startsWith('console.log(') && (msg.content.endsWith(')'))) {
+            respond(msg, "```js\n" + msg.content.slice(18, -1) + "\n```", false, [])
+        } else if (args[1]?.startsWith('console.error(') && msg.content.endsWith(')')) {
+            respond(msg, "```ansi\n[2;31m" + msg.content.slice(20,-1) + "[0m\n```", false, [])
+        }
+    }
 })
