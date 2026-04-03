@@ -3,7 +3,8 @@ import { ChannelManager, Client, EmbedBuilder, Events, GatewayIntentBits, Messag
 import fs from 'fs'; import path from 'path';
 import { Database } from "bun:sqlite";
 import { ceil, evaluate } from 'mathjs';
-import Fuse  from 'fuse.js';
+
+console.log("Please let my code work, oh great Anders Hejlsberg (inventor of TypeScript)!")
 
 const blacklistedChannels = [
     "1224889096779075687", // #serious (Brook)
@@ -58,7 +59,7 @@ function gibberish(path: string, amnt: number) {
         let msg = " "
   
         for (let i = 0; i < amnt; i++) {
-           msg += " " + lines[Math.floor(Math.random()*lines.length)]
+           msg += lines[Math.floor(Math.random()*lines.length)] + " "
         }
         return msg
 
@@ -148,7 +149,8 @@ client.once(Events.ClientReady, (client) => {
     })
 })
 
-client.on("messageCreate", msg => {
+client.on("messageCreate", async msg => {
+
     let args = msg.content.split(' ');
     if (msg.author != client.user) {
         console.log("Message received! " + msg.channel.id + " " + Date())
@@ -156,7 +158,10 @@ client.on("messageCreate", msg => {
     
     if (msg.content.toLowerCase().endsWith("ing") && get_opted(msg.author.id) && !msg.content.endsWith("thing")) {
         // if their message ends with "ing" (and NOT "thing") then it will interject with a classic botster message
-        respond(msg, msg.content.slice(0,-3) + "ong!!! :D", true, [])
+        if (rng(1, 615) < 500) {
+            // 1/6 chance to not respond, because gambling is great!! woo
+            respond(msg, msg.content.slice(0,-3) + "ong!!! :D", true, [])
+        }
     }
 
     // jabbers if pinged (as long as it doesnt conflict with the "is it true")
@@ -189,22 +194,82 @@ client.on("messageCreate", msg => {
         respond(msg, (Number(msg.content) + 1) + "!!! :D", true, [])
     }
 
+
+
+
+
     // COMMANDS COMMANDS COMMANDS COMMANDS
+    
+    // my new innovative piping mechanism :fire:
+/*    if (args[1] === "|" ) {// && (args[2] === pipableCmds[1] || args[2] === pipableCmds[2]) && pipableCmds.includes(args[0],3)) {
+
+    } */
+
     // ?say <content>: Botster sends what you tell it to in its own message, excluding attached media.
     if (args[0]?.toLowerCase() === "?say" ){//&& msg.author != client.user) {
         // sends gibberish if they dont append an argument, to prevent "Erroring" (errors bad)
         if (args[1] != null) {
-            respond(msg, msg.content.slice(4, msg.content.length), false, [])
+                respond(msg, msg.content.slice(4, msg.content.length), false, [])
         } else {
             jabber(msg, rng(2,8))
         }
+    }
+
+    // ?react <emoji> <msgID>: reacts to a specific message with a specific emoji. has to be sent in the same channel
+    else if (args[0]?.toLowerCase() === "?react" && msg.author != client.user) {
+        if (args[1] && Number(args[2]).toString() != "NaN") {
+            try {
+                await msg.channel.messages.fetch(args[2])
+                    .then(reactee => reactee.react(args[1]))
+                    .catch(console.error)
+            } catch (err) {console.error(err)}
+        }
+    }
+
+    // ?avatar <userID>: gets the avatar of someone based on their userID
+    else if (args[0] === "?avatar" && msg.author != client.user) {
+        try {
+            const user = await client.users.fetch(args[1]);
+            msg.reply({
+                files: [{
+                    attachment: user.displayAvatarURL({size: 512}),
+                    name: 'avatar.webp'
+                }]
+            });
+            console.log("got someones avatar " + args[1] + " ")
+        } catch(err) {
+            respond(msg,"couldnt find that gamer",true,[])
+        };
+    }
+
+    // ?8ball <question>: asks the magic 8 ball glorious botster a question
+    else if (args[0]?.toLowerCase() === "?8ball" && msg.author != client.user) {
+        respond(msg, gibberish('../assets/text/8ball.md', 1), true, [])
+    }
+
+    // ?motivation: sends a random motivational quote from motivation.md
+    else if (args[0]?.toLowerCase() === "?motivation" && msg.author != client.user) {
+        respond(msg, gibberish('../assets/text/motivation.md', 1), true, [])
     }
 
     // ?gibberish/?jabber <amount>: jibber jabbers on, random word generator, <amount> controls how many words it sends
     else if ((args[0]?.toLowerCase() === "?gibberish" || args[0]?.toLowerCase() === "?jabber") && msg.author != client.user) {
         // if it's actually a number then it'll use that
         if (Number(args[1]).toString() != "NaN") {
-            jabber(msg, Number(args[1]))
+            if (args[2]) {
+                respond(msg, msg.content.slice(12 + args[1]?.length, msg.content.length) + gibberish("../assets/text/vocabulary.md", Number(args[1])), false, [])
+            } else {
+                jabber(msg, Number(args[1]))
+            }
+        } else if (args[1]) {
+            if (args[1] === "|" && args[2] === "?unteach") {
+                const gibber = gibberish('../assets/text/vocabulary.md', 1)
+                const vocab = fs.readFileSync("../assets/text/vocabulary.md")
+                fs.writeFileSync('../assets/text/vocabulary.md', vocab.toString().replace("\n" + gibber,""))
+                respond(msg, "i now DONT know the word \"" + gibber + "\"!!!", false, [])
+            } else {
+                respond(msg, msg.content.slice(11, msg.content.length) + gibberish("../assets/text/vocabulary.md", rng(1,5)), false, [])
+            }
         } else {
             jabber(msg, rng(2,8))
         }
@@ -224,11 +289,12 @@ client.on("messageCreate", msg => {
 
     // ?teach <vocabulary>: teaches botster a new word/phrase! 24 character limit
     else if (args[0]?.toLowerCase() === "?teach" && !msg.author.bot && args[1] && msg.author.id != "1354237568992018475") {
-        let newVocab = msg.content.slice(7, msg.content.length).toLowerCase().slice(0,24).replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"")
+        let newVocab = msg.content.slice(7, msg.content.length).slice(0,24).replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"")
 
         let vocab = fs.readFileSync('../assets/text/vocabulary.md')
         let lines = vocab.toString().replace(/\n$/, '').split('\n')
 
+        // if it's NOT in the file, appends it. pretty simple
         if (!lines.includes(newVocab)) {
             fs.appendFileSync('../assets/text/vocabulary.md', newVocab + "\n")
             respond(msg, "i now know the word \"" + newVocab + "\"!!! hopefully it's not a slur", false, [])
@@ -244,6 +310,7 @@ client.on("messageCreate", msg => {
         let vocab = fs.readFileSync('../assets/text/vocabulary.md')
         let lines = vocab.toString().replace(/\n$/, '').split('\n')
 
+        // if it's in the file already, removes it. pretty simple
         if (lines.includes(oldVocab)) {
             fs.writeFileSync('../assets/text/vocabulary.md', vocab.toString().replace("\n" + oldVocab,""))
             respond(msg, "i now DONT know the word \"" + oldVocab + "\"!!!", false, [])
@@ -253,7 +320,7 @@ client.on("messageCreate", msg => {
     }
 
     // ?wordnew: makes a new word
-    else if (args[0]?.toLowerCase() === "?wordnew") {
+    else if (args[0]?.toLowerCase() === "?wordnew" && msg.author != client.user) {
         const vowels = "aeiouy".split(''); const consonants = "bcdfghjklmnpqrstvwxz".split('');
         let newWord = ""
         for (let i = 0; i < rng(3,14); i++) {
@@ -264,8 +331,18 @@ client.on("messageCreate", msg => {
                 newWord = newWord + consonants[rng(0,consonants.length - 1)]
             }
         }
-        // console.log("I made a word!!! :D it's " + newWord)
-        respond(msg, "I made a new word! It's \"" + newWord + "\"", false, [])
+        if (args[1] === "|" && args[2] === "?teach") {    
+            let lines = fs.readFileSync('../assets/text/vocabulary.md').toString().replace(/\n$/, '').split('\n')
+
+            if (!lines.includes(newWord)) {
+                fs.appendFileSync('../assets/text/vocabulary.md', newWord + "\n")
+                respond(msg, "i now know the word \"" + newWord + "\"!!! hopefully it's not a slur", false, [])
+            } else {
+                respond(msg, "i already know that word :​sob:", false, [])
+            }
+        } else {
+            respond(msg, "i invented a new word, it's \"" + newWord + "\"!!! :D", false, [])
+        }
     }
 
     // ?rng <floor> <ceiling>: random number generator
@@ -273,7 +350,11 @@ client.on("messageCreate", msg => {
         // making sure both arguments are present (floor and ceiling)
         let theNumber = rng(Number(args[1]), Number(args[2])).toString()
         // example output: "RNG from `1`-`5` is `3`"
-        respond(msg, "RNG from `" + args[1] + "`-`" + args[2] + "` is \`" + theNumber + "\`", true, [])
+        if (args[3] === "|" && args[4] === "?gibberish") {
+            respond(msg, gibberish("../assets/text/vocabulary.md", Number(theNumber)), false, [])
+        } else {
+            respond(msg, "RNG from `" + args[1] + "`-`" + args[2] + "` is \`" + theNumber + "\`", true, [])
+        }
     } 
 
     // ?math <expression>: evaluates math, but it DOESN'T use eval() or anything so don't bother

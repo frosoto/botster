@@ -1,0 +1,7 @@
+Perfection is not attainable, but if we chase perfection we can catch excellence.
+The day you plant the seed is not the day you eat the fruit.
+Raise your words, not your voice; for it is rain that grows flowers, not thunder.
+The lion cares about the mental state and respects the consent of the small dog.
+Just because everyone is going in a directional direction, does not mean you need go the direction of everyone else. Make your own directional direction.
+Where you look may can have sad, but change direction of looking to and have happiness. Even if situation has sad, but look happiness for success
+It is not the critic who counts; not the man who points out how the strong man (gender-neutral) stumbles, or where the doer of deeds could have done them better. The credit belongs to the man (gender-neutral) who is actually in the arena, whose face is marred by dust and sweat and blood; who strives valiantly; who errs, who comes short again and again, because there is no effort without error and shortcoming; but who does actually strive to do the deeds; who knows great enthusiasms, the great devotions; who spends themselves in a worthy cause; who at the best knows in the end the triumph of high achievement, and who at the worst, if they fails, at least fails while daring greatly, so that their place shall never be with those cold and timid souls who neither know victory nor defeat.
