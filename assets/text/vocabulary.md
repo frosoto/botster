@@ -300,3 +300,31 @@ gloop
 goog
 goob
 qmi
+🔪
+😁
+sweden
+finland
+ireland
+nova scotia
+davao city
+mindanao
+luzon
+manila
+chicago
+miami
+stockholm
+syndrome
+cagayan de oro
+tagabukid
+nagmamahal
+di ko alam
+nintendo
+wii
+Wii U edition
+type
+of
+water
+release the
+Einstein
+files
+release

@@ -1,8 +1,9 @@
 // import discord.js
-import { ChannelManager, Client, EmbedBuilder, Events, GatewayIntentBits, Message, Partials, TextChannel, ActivityType } from "discord.js";
+import { ChannelManager, Client, EmbedBuilder, Events, GatewayIntentBits, Message, Partials, TextChannel, ActivityType, ButtonStyle, ButtonBuilder, Options } from "discord.js";
 import fs from 'fs'; import path from 'path';
 import { Database } from "bun:sqlite";
 import { ceil, evaluate } from 'mathjs';
+import { Pagination } from 'pagination.djs';
 
 console.log("Please let my code work, oh great Anders Hejlsberg (inventor of TypeScript)!")
 
@@ -390,5 +391,47 @@ client.on("messageCreate", async msg => {
         } else if (args[1]?.startsWith('console.error(') && msg.content.endsWith(')')) {
             respond(msg, "```ansi\n[2;31m" + msg.content.slice(20,-1) + "[0m\n```", false, [])
         }
+    }
+
+    else if (args[0]?.toLowerCase() === "?botster") {
+        const pagination = new Pagination(msg)
+            .setColor(0xBE1931)
+            .setTitle('botster')
+            .setDescription('I will botst until the sands of time are gone!! :D')
+            .setThumbnail('https://cdn.discordapp.com/avatars/1471709531363872901/9d8b4c838aa3525dbfd9c8f8931fd569.webp?size=1024')
+            .setFields([{
+                name: 'Normal Commands',
+                value: `- **?say <message>:** Says what you tell it to!
+- **?leetsay <message>:** Says what you tell it to but like a l33t h4x0r would...
+- **?rng <floor> <ceiling>:** Generates a random number from the fields you provided!
+- **?eval <code>:** Totally runs your javascript code through eval(), 1000%
+- **?optin/?optout:** Opts you in or out to interjections. Fun fact: if you say anything after "?opt" other than "in" then it will opt you out, and the command still works. Try it with ?optwoejrtolsfm or something like that
+- **?math <expression>:** Uses mathematics to solve your expression.
+- **?meth <expression>:** Uses methematics to solve your expression.
+                `
+            }, {
+                name: 'Vocabulary/Gibberish Commands', 
+                value: `- **?gibberish <amount/start>:** Sends gibberish with random words from vocabulary.md. Can customize the amount of words with an argument, make it generate gibberish after a specified string, or pipe it to send a random amount of words within your own range like **?gibberish | ?rng 50 60**.
+- **?vocabulary:** Sends the vocabulary.md file
+- **?wordnew:** Generates a new word from completely random letters in a random order!
+- **?teach:** Teaches a new word to my vocabulary, you can pipe it like **?teach | ?wordnew** to make it a new word I invent.
+- **?unteach:** Removes a word from my vocabulary, you can pipe it like **?unteach | ?gibberish** to remove a random word. Please be nice!
+
+- **?8ball <question>:** Responds with a random Magic 8 Ball phrase to help answer questions or decide decisions.
+- **?motivation:** Sends a random motivational quote from motvation.md`
+            }
+            ])
+            .setTimestamp()
+            .setFooter({ text: 'lobstercorp', iconURL: 'https://discord.com/assets/058354fcb696333d.svg'});
+        pagination.paginateFields(true)
+        pagination.setEmojis({
+            firstEmoji: '<:lobster_left2:1493437591528411277>',
+            prevEmoji: '<:lobster_left:1493437568514003138>',
+            nextEmoji: '<:lobster_right:1493437661145206824>',
+            lastEmoji: '<:lobster_right2:1493437674659254285>'
+        })
+        // pagination.buttons = { prev: new ButtonBuilder(), next: new ButtonBuilder() };
+        pagination.setLimit(1)
+        pagination.render()
     }
 })
