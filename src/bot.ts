@@ -77,7 +77,7 @@ function respond(msg: Message, content: string, reply: boolean, pings: string[])
             // replying to a msg, {content: foo, reply: true, pings: []}
             console.log("replying to a msg, {content: \`" + content + "\`, pings: [" + pings.toString() + "]}")
             try {msg.reply({
-                content: content,
+                content: content.replace(/(?<=\b\w+)ing\b/g, 'ong').replace(/thong/g, 'thing'),
                 // allowedMentions: { users: [ "1244108884277465131" ] },
             })} catch(err) {
                 (client.channels.cache.get("1488055455879004160") as TextChannel).send('ERROR: ' + err)
@@ -85,7 +85,7 @@ function respond(msg: Message, content: string, reply: boolean, pings: string[])
         } else {
             console.log("replying to a msg, {content: \`" + content + "\`, pings: [null]}")
             try {msg.reply({
-                content: content,
+                content: content.replace(/(?<=\b\w+)ing\b/g, 'ong').replace(/thong/g, 'thing'),
                 allowedMentions: { parse: [] }
             })} catch(err) {
                 (client.channels.cache.get("1488055455879004160") as TextChannel).send('ERROR: ' + err)
@@ -96,7 +96,7 @@ function respond(msg: Message, content: string, reply: boolean, pings: string[])
         if (pings[1] != null) { 
             console.log("responding to a msg, {content: \`" + content + "\`, pings: [" + pings.toString() + "]}")
             try {msg.channel.send({
-                content: content,
+                content: content.replace(/(?<=\b\w+)ing\b/g, 'ong').replace(/thong/g, 'thing'),
                 allowedMentions: { users: pings }
             })} catch(err) {
                 (client.channels.cache.get("1488055455879004160") as TextChannel).send('ERROR: ' + err)
@@ -104,7 +104,7 @@ function respond(msg: Message, content: string, reply: boolean, pings: string[])
         } else {
             console.log("responding to a msg, {content: \`" + content + "\`, pings: [null]}")
             try {msg.channel.send({
-                content: content,
+                content: content.replace(/(?<=\b\w+)ing\b/g, 'ong').replace(/thong/g, 'thing'),
                 allowedMentions: { parse: [] }
             })} catch(err) {
                 (client.channels.cache.get("1488055455879004160") as TextChannel).send('ERROR: ' + err)
@@ -150,18 +150,42 @@ client.once(Events.ClientReady, (client) => {
     })
 })
 
+client.on("messageReactionAdd", async rct => {
+    if (rct.message.partial) {
+        try {await rct.message.fetch()} catch (err) {console.error("boom react thingy errored with " + err)}
+    };
+
+    if (rct.emoji.name === "💥" && rct.message.author === client.user) {
+        rct.message.delete()
+    } else if (rct.emoji.id != "1309965553770954914" && !rct.me && rct.message.author === client.user) {
+        respond(rct.message, rct.emoji.name, false, [])
+    } else if (rct.emoji.id != "1309965553770954914" && Number(rct.count) > 2) {
+        respond(rct.message, "Thank you for the upvotes kind strangers!", true, [])
+    }
+})
+
 client.on("messageCreate", async msg => {
+
+    if (!blacklistedChannels.includes(msg.channel.id) && rng(1, 4096) === 2) {
+        msg.channel.send({
+            files: [{
+                attachment: "../assets/blue_lobster.mp4",
+                name: "blue_lobster.mp4"
+            }]
+        });
+        console.log("BlUE LOBSTER JUMPSCARE");
+    }
 
     let args = msg.content.split(' ');
     if (msg.author != client.user) {
         console.log("Message received! " + msg.channel.id + " " + Date())
     }
     
-    if (msg.content.toLowerCase().endsWith("ing") && get_opted(msg.author.id) && !msg.content.endsWith("thing")) {
+    if (msg.content.toLowerCase().endsWith("ing") && get_opted(msg.author.id) && !msg.content.toLowerCase().endsWith("thing")) {
         // if their message ends with "ing" (and NOT "thing") then it will interject with a classic botster message
-        if (rng(1, 615) < 500) {
+        if (rng(1, 6) > 1 && msg.content.length <= 128) {
             // 1/6 chance to not respond, because gambling is great!! woo
-            respond(msg, msg.content.slice(0,-3) + "ong!!! :D", true, [])
+            respond(msg, msg.content.slice(0,-3).replace(/(?<=\b\w+)ing\b/g, 'ong').replace(/thong/g, 'thing') + "ong!!! :D", true, [])
         }
     }
 
@@ -175,8 +199,18 @@ client.on("messageCreate", async msg => {
         // 50/50 chance 
         if (rng(1,2) === 1) {
             respond(msg, "Hell, yeah! this is so " + (2 + 2 === 4), true, [msg.author.id])
+            if (msg.reference) {
+                (await msg.fetchReference()).react('✅')
+            } else {
+                msg.react('✅')
+            }
         } else {
             respond(msg, "No ,! this is so " + (2 + 2 === 3), true, [msg.author.id])
+            if (msg.reference) {
+                (await msg.fetchReference()).react('❌')
+            } else {
+                msg.react('❌')
+            }
         }
     }
 
@@ -186,7 +220,7 @@ client.on("messageCreate", async msg => {
     }
 
     if ((args[0] === "john" || args[0] === "joe" || args[0] === "johnny" || args[0] === "joseph" || args[0] === "jonathan") && !args[2] && get_opted(msg.author.id)) {
-        respond(msg, "OMG I'm such a big fan of " + msg.content.toLowerCase().replace("ing","ong"), true, [])
+        respond(msg, "OMG I'm such a big fan of ", true, [])
     }
 
     // if message is just a number, botster will repeat but add 1 more
@@ -207,7 +241,7 @@ client.on("messageCreate", async msg => {
     } */
 
     // ?say <content>: Botster sends what you tell it to in its own message, excluding attached media.
-    if (args[0]?.toLowerCase() === "?say" ){//&& msg.author != client.user) {
+    if (args[0]?.toLowerCase() === "?say" && msg.author != client.user) {
         // sends gibberish if they dont append an argument, to prevent "Erroring" (errors bad)
         if (args[1] != null) {
                 respond(msg, msg.content.slice(4, msg.content.length), false, [])
@@ -215,6 +249,14 @@ client.on("messageCreate", async msg => {
             jabber(msg, rng(2,8))
         }
     }
+
+    /* else if (args[0]?.toLowerCase() === "?leetsay" && msg.author != client.user) {
+        if (args[1] != null) {
+            respond(msg, msg.content.toUpperCase().replace('T','7').replace('B','8').replace('I','1').replace('S','5').replace('E','3').replace('A','4').replace('G','6').replace('O','0'), false, [])
+        } else if (args[1] === "|" && args[2] === "gibberish") {
+
+        }
+    } */
 
     // ?react <emoji> <msgID>: reacts to a specific message with a specific emoji. has to be sent in the same channel
     else if (args[0]?.toLowerCase() === "?react" && msg.author != client.user) {
@@ -224,6 +266,8 @@ client.on("messageCreate", async msg => {
                     .then(reactee => reactee.react(args[1]))
                     .catch(console.error)
             } catch (err) {console.error(err)}
+        } else if (args[1] && msg.fetchReference() != null) {
+            (await msg.fetchReference()).react(args[1])
         }
     }
 
@@ -251,6 +295,10 @@ client.on("messageCreate", async msg => {
     // ?motivation: sends a random motivational quote from motivation.md
     else if (args[0]?.toLowerCase() === "?motivation" && msg.author != client.user) {
         respond(msg, gibberish('../assets/text/motivation.md', 1), true, [])
+    }
+
+    else if (args[0]?.toLowerCase() === "?ban" && msg.author != client.user) {
+        respond(msg, "BEEP BOOP I AM GOING TO BAN THEM 🤖🤖🤖", false, [])
     }
 
     // ?gibberish/?jabber <amount>: jibber jabbers on, random word generator, <amount> controls how many words it sends
@@ -416,9 +464,14 @@ client.on("messageCreate", async msg => {
 - **?wordnew:** Generates a new word from completely random letters in a random order!
 - **?teach:** Teaches a new word to my vocabulary, you can pipe it like **?teach | ?wordnew** to make it a new word I invent.
 - **?unteach:** Removes a word from my vocabulary, you can pipe it like **?unteach | ?gibberish** to remove a random word. Please be nice!
-
 - **?8ball <question>:** Responds with a random Magic 8 Ball phrase to help answer questions or decide decisions.
 - **?motivation:** Sends a random motivational quote from motvation.md`
+            }, {
+                name: 'Interjections',
+                value: `- Any message that ends in "ing" will be repeated but with "ong!!! :D" at the end!
+- Saying "clanker", "clanka", "wireback", or "tinskin" makes Botster get real sad and say "that's not a very nice word :("
+- Saying "john <blank>" makes Botster go "OMG I'm such a big fan of john <blank>". This also works for "joe", "johnny", "joseph", and "jonathan"
+- This doesn't require being opted in, but saying "<@1471709531363872901> is this true" will ask Botster if it's true or not (50/50 chance)`
             }
             ])
             .setTimestamp()
