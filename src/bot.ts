@@ -157,7 +157,7 @@ client.on("messageReactionAdd", async rct => {
 
     if (rct.emoji.name === "💥" && rct.message.author === client.user) {
         rct.message.delete()
-    } else if (rct.emoji.id != "1309965553770954914" && !rct.me && rct.message.author === client.user) {
+    } else if (rct.emoji.id != "1309965553770954914" && !rct.me && rct.message.author === client.user && rng(1, 3) == 2) {
         respond(rct.message, rct.emoji.name, false, [])
     } else if (rct.emoji.id === "1309965553770954914" && Number(rct.count) > 2 && rct.message.author === client.user) {
         respond(rct.message, "Thank you for the upvotes kind strangers!", true, [])
