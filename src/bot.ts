@@ -159,7 +159,7 @@ client.on("messageReactionAdd", async rct => {
         rct.message.delete()
     } else if (rct.emoji.id != "1309965553770954914" && !rct.me && rct.message.author === client.user) {
         respond(rct.message, rct.emoji.name, false, [])
-    } else if (rct.emoji.id != "1309965553770954914" && Number(rct.count) > 2) {
+    } else if (rct.emoji.id === "1309965553770954914" && Number(rct.count) > 2 && rct.message.author === client.user) {
         respond(rct.message, "Thank you for the upvotes kind strangers!", true, [])
     }
 })
@@ -220,7 +220,7 @@ client.on("messageCreate", async msg => {
     }
 
     if ((args[0] === "john" || args[0] === "joe" || args[0] === "johnny" || args[0] === "joseph" || args[0] === "jonathan") && !args[2] && get_opted(msg.author.id)) {
-        respond(msg, "OMG I'm such a big fan of ", true, [])
+        respond(msg, "OMG I'm such a big fan of " + args[1], true, [])
     }
 
     // if message is just a number, botster will repeat but add 1 more
@@ -338,7 +338,7 @@ client.on("messageCreate", async msg => {
 
     // ?teach <vocabulary>: teaches botster a new word/phrase! 24 character limit
     else if (args[0]?.toLowerCase() === "?teach" && !msg.author.bot && args[1] && msg.author.id != "1354237568992018475") {
-        let newVocab = msg.content.slice(7, msg.content.length).slice(0,24).replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"")
+        let newVocab = msg.content.slice(7, msg.content.length).toLowerCase().slice(0,24).replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"")
 
         let vocab = fs.readFileSync('../assets/text/vocabulary.md')
         let lines = vocab.toString().replace(/\n$/, '').split('\n')
