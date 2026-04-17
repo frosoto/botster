@@ -223,7 +223,7 @@ client.on("messageCreate", async msg => {
         respond(msg, "OMG I'm such a big fan of " + args[0] + " " + args[1], true, [])
     }
 
-    if (msg.content.toLowerCase().replace(/\s!.,?;:1234567890/g,"") === "thanksbotster") {
+    if (msg.content.toLowerCase().replace(/!.,?;:1234567890/g,"").replace(/\s/g, "") === "thanksbotster") {
         respond(msg, "heh... you're so welcome... B)", true, [])
     }
 
