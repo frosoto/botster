@@ -220,7 +220,11 @@ client.on("messageCreate", async msg => {
     }
 
     if ((args[0] === "john" || args[0] === "joe" || args[0] === "johnny" || args[0] === "joseph" || args[0] === "jonathan") && !args[2] && get_opted(msg.author.id)) {
-        respond(msg, "OMG I'm such a big fan of " + args[1], true, [])
+        respond(msg, "OMG I'm such a big fan of " + args[0] + args[1], true, [])
+    }
+
+    if (msg.content.toLowerCase().replace(/ !.,?;:1234567890/g,"") === "thanksbotster") {
+        respond(msg, "heh... you're so welcome... B)", true, [])
     }
 
     // if message is just a number, botster will repeat but add 1 more
