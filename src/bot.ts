@@ -72,6 +72,13 @@ function rng(floor: number, ceiling: number) {
 }
 
 function respond(msg: Message, content: string, reply: boolean, pings: string[]) {
+    if (rng(1, 50) === 42 && msg.content.startsWith("?")) {
+        console.log("huh")
+        try {msg.reply({
+            content: "im so sorry but the response i shouldve sent died in a car crash",
+            allowedMentions: { parse: [] }
+        }); return} catch (err) {console.error("What")}
+    };
     if (reply) {
         if (pings[0] != null) { 
             // replying to a msg, {content: foo, reply: true, pings: []}
@@ -159,7 +166,7 @@ client.on("messageReactionAdd", async rct => {
         rct.message.delete()
     } else if (rct.emoji.id != "1309965553770954914" && !rct.me && rct.message.author === client.user && rng(1, 3) == 2) {
         respond(rct.message, rct.emoji.name, false, [])
-    } else if (rct.emoji.id === "1309965553770954914" && Number(rct.count) > 2 && rct.message.author === client.user) {
+    } else if (rct.emoji.id === "1309965553770954914" && Number(rct.count) === 3 && rct.message.author === client.user) {
         respond(rct.message, "Thank you for the upvotes kind strangers!", true, [])
     }
 })
