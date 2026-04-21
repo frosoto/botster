@@ -308,7 +308,7 @@ client.on("messageCreate", async msg => {
         respond(msg, gibberish('../assets/text/motivation.md', 1), true, [])
     }
 
-    else if (args[0]?.toLowerCase() === "?ban" && msg.author != client.user) {
+    else if (args[0]?.toLowerCase() === "?ban" && msg.author != client.user && msg.author.id != "1153836038918242304") {
         respond(msg, "BEEP BOOP I AM GOING TO BAN THEM 🤖🤖🤖", false, [])
     }
 
