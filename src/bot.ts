@@ -72,6 +72,7 @@ function rng(floor: number, ceiling: number) {
 }
 
 function respond(msg: Message, content: string, reply: boolean, pings: string[]) {
+    let newContent = content.replace(/(?<=\b\w+)ing\b/g, 'ong').slice(0, 128)
     if (rng(1, 50) === 42 && msg.content.startsWith("?")) {
         console.log("huh")
         try {msg.reply({
