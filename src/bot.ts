@@ -298,6 +298,10 @@ client.on("messageCreate", async msg => {
         };
     }
 
+    // ?pick
+    else if (args[0].toLowerCase() === "?pick" && msg.author != client.user) {
+	    respond(msg, "i pick " + args[rng(1,args.length - 1)].replace(/_/g," "), true, []);
+    }
     // ?8ball <question>: asks the magic 8 ball glorious botster a question
     else if (args[0]?.toLowerCase() === "?8ball" && msg.author != client.user) {
         respond(msg, gibberish('../assets/text/8ball.md', 1), true, [])
