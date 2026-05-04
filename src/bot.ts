@@ -72,7 +72,7 @@ function rng(floor: number, ceiling: number) {
 }
 
 function respond(msg: Message, content: string, reply: boolean, pings: string[]) {
-    let newContent = content.replace(/(?<=\b\w+)ing\b/g, 'ong').slice(0, 128)
+    let newContent = content.replace(/(?<=\b\w+)ing\b/g, 'ong').replace(/thong/g, 'thing').slice(0, 100)
     if (rng(1, 50) === 42 && msg.content.startsWith("?")) {
         console.log("huh")
         try {msg.reply({
@@ -85,7 +85,7 @@ function respond(msg: Message, content: string, reply: boolean, pings: string[])
             // replying to a msg, {content: foo, reply: true, pings: []}
             console.log("replying to a msg, {content: \`" + content + "\`, pings: [" + pings.toString() + "]}")
             try {msg.reply({
-                content: content.replace(/(?<=\b\w+)ing\b/g, 'ong').replace(/thong/g, 'thing'),
+                content: newContent,
                 // allowedMentions: { users: [ "1244108884277465131" ] },
             })} catch(err) {
                 (client.channels.cache.get("1488055455879004160") as TextChannel).send('ERROR: ' + err)
@@ -93,7 +93,7 @@ function respond(msg: Message, content: string, reply: boolean, pings: string[])
         } else {
             console.log("replying to a msg, {content: \`" + content + "\`, pings: [null]}")
             try {msg.reply({
-                content: content.replace(/(?<=\b\w+)ing\b/g, 'ong').replace(/thong/g, 'thing'),
+                content: newContent,
                 allowedMentions: { parse: [] }
             })} catch(err) {
                 (client.channels.cache.get("1488055455879004160") as TextChannel).send('ERROR: ' + err)
@@ -104,7 +104,7 @@ function respond(msg: Message, content: string, reply: boolean, pings: string[])
         if (pings[1] != null) { 
             console.log("responding to a msg, {content: \`" + content + "\`, pings: [" + pings.toString() + "]}")
             try {msg.channel.send({
-                content: content.replace(/(?<=\b\w+)ing\b/g, 'ong').replace(/thong/g, 'thing'),
+                content: newContent, 
                 allowedMentions: { users: pings }
             })} catch(err) {
                 (client.channels.cache.get("1488055455879004160") as TextChannel).send('ERROR: ' + err)
@@ -112,7 +112,7 @@ function respond(msg: Message, content: string, reply: boolean, pings: string[])
         } else {
             console.log("responding to a msg, {content: \`" + content + "\`, pings: [null]}")
             try {msg.channel.send({
-                content: content.replace(/(?<=\b\w+)ing\b/g, 'ong').replace(/thong/g, 'thing'),
+                content: newContent, 
                 allowedMentions: { parse: [] }
             })} catch(err) {
                 (client.channels.cache.get("1488055455879004160") as TextChannel).send('ERROR: ' + err)
