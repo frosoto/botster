@@ -471,6 +471,7 @@ client.on("messageCreate", async msg => {
 - **?optin/?optout:** Opts you in or out to interjections. Fun fact: if you say anything after "?opt" other than "in" then it will opt you out, and the command still works. Try it with ?optwoejrtolsfm or something like that
 - **?math <expression>:** Uses mathematics to solve your expression.
 - **?meth <expression>:** Uses methematics to solve your expression.
+- **?pick <options>:** Picks from a variety of options, separated by spaces. Replaces all underscores with spaces.
                 `
             }, {
                 name: 'Vocabulary/Gibberish Commands', 
