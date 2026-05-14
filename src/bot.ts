@@ -410,6 +410,15 @@ client.on("messageCreate", async msg => {
             } else {
                 respond(msg, "i already know that word :​sob:", false, [])
             }
+        } else if (args[1] === "|" && args[2] === "?scramble") {
+            let scrambledContent = ""
+            let splitWord = newWord.split('');
+            for (let i2 = 1; i2 <= newWord.length; i2++) {
+                let letter = splitWord[rng(0, splitWord.length - 1)]
+                scrambledContent = scrambledContent + letter
+                splitWord?.splice(splitWord.indexOf(letter), 1)
+            }
+            respond(msg, scrambledContent, true, [])
         } else {
             respond(msg, "i invented a new word, it's \"" + newWord + "\"!!! :D", false, [])
         }
