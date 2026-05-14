@@ -326,7 +326,7 @@ client.on("messageCreate", async msg => {
                 respond(msg, msg.content.slice(12 + args[1]?.length, msg.content.length).replace(/<gibber>/g, gibberish('../assets/text/vocabulary.md', 1).slice(1,-1))
                 + gibberish("../assets/text/vocabulary.md", Number(args[1])), false, [])
             } else {
-                jabber(msg, Number(args[1]))
+                jabber(msg, Number(args[1]?.slice(0,5)))
             }
         } else if (args[1]) {
             if (args[1] === "|" && args[2] === "?unteach") {
@@ -446,7 +446,7 @@ client.on("messageCreate", async msg => {
         let theNumber = rng(Number(args[1]), Number(args[2])).toString()
         // example output: "RNG from `1`-`5` is `3`"
         if (args[3] === "|" && args[4] === "?gibberish") {
-            respond(msg, gibberish("../assets/text/vocabulary.md", Number(theNumber)), false, [])
+            respond(msg, gibberish("../assets/text/vocabulary.md", Number(theNumber.slice(0,4))), false, [])
         } else {
             respond(msg, "RNG from `" + args[1] + "`-`" + args[2] + "` is \`" + theNumber + "\`", true, [])
         }
