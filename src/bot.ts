@@ -415,6 +415,22 @@ client.on("messageCreate", async msg => {
         }
     }
 
+    // ?scramble: scrambles a word/phrase
+    else if (args[0]?.toLowerCase() === "?scramble" && msg.author != client.user) {
+        let scrambledContent = ""
+        for (let i = 1; i < args.length; i++) {
+            let splitWord = args[i]?.split('');
+            for (let i2 = 1; i2 <= args[i]?.length; i2++) {
+                let letter = splitWord[rng(0, splitWord.length - 1)]
+                scrambledContent = scrambledContent + letter
+                splitWord?.splice(splitWord.indexOf(letter), 1)
+            }
+            scrambledContent = scrambledContent + " "
+            // console.log(scrambledContent)
+        }
+        respond(msg, scrambledContent, true, [])
+    }
+
     // ?rng <floor> <ceiling>: random number generator
     else if (args[0]?.toLowerCase() === "?rng" && msg.author != client.user) {
         // making sure both arguments are present (floor and ceiling)
