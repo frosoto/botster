@@ -320,12 +320,12 @@ client.on("messageCreate", async msg => {
     // ?gibberish/?jabber <amount>: jibber jabbers on, random word generator, <amount> controls how many words it sends
     else if ((args[0]?.toLowerCase() === "?gibberish" || args[0]?.toLowerCase() === "?jabber") && msg.author != client.user) {
         // if it's actually a number then it'll use that
-        if (Number(args[1]).toString() != "NaN") {
-            if (args[2]) {
+        if (Number(args[1]).toString() != "NaN" && args[2] != "|") {
+            if (args[2] && args[2] != "|") {
                 // revolutionary feature where it continues your sentence with gibberish
                 respond(msg, msg.content.slice(12 + args[1]?.length, msg.content.length).replace(/<gibber>/g, gibberish('../assets/text/vocabulary.md', 1).slice(1,-1))
                 + gibberish("../assets/text/vocabulary.md", Number(args[1])), false, [])
-            } else {
+            } else if (args[2] != "|") {
                 jabber(msg, Number(args[1]?.slice(0,5)))
             }
         } else if (args[1]) {
@@ -335,6 +335,26 @@ client.on("messageCreate", async msg => {
                 const vocab = fs.readFileSync("../assets/text/vocabulary.md")
                 fs.writeFileSync('../assets/text/vocabulary.md', vocab.toString().replace("\n" + gibber,""))
                 respond(msg, "i now DONT know the word \"" + gibber + "\"!!!", false, [])
+            } else if ((args[1] === "|" && args[2] === "?scramble") || (Number(args[1]).toString() != "NaN" && args[2] === "|" && args[3] === "?scramble")) {
+                let gibber = gibberish('../assets/text/vocabulary.md', rng(1, 8))
+                console.log(gibber)
+                if (Number(args[1]).toString() != "NaN") {
+                    gibber = gibberish('../assets/text/vocabulary.md', Number(args[1]))
+                }
+
+                let gibberArgs = gibber.split(" "); let scrambledContent = "";
+                console.log(gibberArgs)
+                for (let i = 1; i < gibberArgs.length; i++) {
+                    let splitWord = gibberArgs[i]?.split('');
+                    for (let i2 = 1; i2 <= gibberArgs[i]?.length; i2++) {
+                        let letter = splitWord[rng(0, splitWord.length - 1)]
+                        scrambledContent = scrambledContent + letter
+                        splitWord?.splice(splitWord.indexOf(letter), 1)
+                    }
+                    scrambledContent = scrambledContent + " "
+                    // console.log(scrambledContent)
+                }
+                respond(msg, scrambledContent, true, [])
             } else {
                 // revolutionary feature where it continues your sentence with gibberish
                 respond(msg, msg.content.slice(11, msg.content.length).replace(/<gibber>/g, gibberish('../assets/text/vocabulary.md', 1).slice(1,-1))
@@ -376,7 +396,7 @@ client.on("messageCreate", async msg => {
     else if (args[0]?.toLowerCase() === "?unteach" && !msg.author.bot) {
         let oldVocab = msg.content.slice(9, msg.content.length).slice(0,24) //.toLowerCase().slice(0,24).replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").replace(/\s+/g,"")
         console.log(oldVocab)
-
+ 
         let vocab = fs.readFileSync('../assets/text/vocabulary.md')
         let lines = vocab.toString().replace(/\n$/, '').split('\n')
 
