@@ -322,18 +322,23 @@ client.on("messageCreate", async msg => {
         // if it's actually a number then it'll use that
         if (Number(args[1]).toString() != "NaN") {
             if (args[2]) {
-                respond(msg, msg.content.slice(12 + args[1]?.length, msg.content.length) + gibberish("../assets/text/vocabulary.md", Number(args[1])), false, [])
+                // revolutionary feature where it continues your sentence with gibberish
+                respond(msg, msg.content.slice(12 + args[1]?.length, msg.content.length).replace(/<gibber>/g, gibberish('../assets/text/vocabulary.md', 1).slice(1,-1))
+                + gibberish("../assets/text/vocabulary.md", Number(args[1])), false, [])
             } else {
                 jabber(msg, Number(args[1]))
             }
         } else if (args[1]) {
             if (args[1] === "|" && args[2] === "?unteach") {
+                // unteaches a random word, i love piping!!!
                 const gibber = gibberish('../assets/text/vocabulary.md', 1)
                 const vocab = fs.readFileSync("../assets/text/vocabulary.md")
                 fs.writeFileSync('../assets/text/vocabulary.md', vocab.toString().replace("\n" + gibber,""))
                 respond(msg, "i now DONT know the word \"" + gibber + "\"!!!", false, [])
             } else {
-                respond(msg, msg.content.slice(11, msg.content.length) + gibberish("../assets/text/vocabulary.md", rng(1,5)), false, [])
+                // revolutionary feature where it continues your sentence with gibberish
+                respond(msg, msg.content.slice(11, msg.content.length).replace(/<gibber>/g, gibberish('../assets/text/vocabulary.md', 1).slice(1,-1))
+                + gibberish("../assets/text/vocabulary.md", rng(1,5)), false, [])
             }
         } else {
             jabber(msg, rng(2,8))
@@ -354,7 +359,7 @@ client.on("messageCreate", async msg => {
 
     // ?teach <vocabulary>: teaches botster a new word/phrase! 24 character limit
     else if (args[0]?.toLowerCase() === "?teach" && !msg.author.bot && args[1] && msg.author.id != "1354237568992018475") {
-        let newVocab = msg.content.slice(7, msg.content.length).toLowerCase().slice(0,24).replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"")
+        let newVocab = msg.content.slice(7, msg.content.length).toLowerCase().slice(0,24).replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").replace(/\s+/g,"")
 
         let vocab = fs.readFileSync('../assets/text/vocabulary.md')
         let lines = vocab.toString().replace(/\n$/, '').split('\n')
@@ -369,7 +374,7 @@ client.on("messageCreate", async msg => {
     }
 
     else if (args[0]?.toLowerCase() === "?unteach" && !msg.author.bot) {
-        let oldVocab = msg.content.slice(9, msg.content.length).toLowerCase().slice(0,24).replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"")
+        let oldVocab = msg.content.slice(9, msg.content.length).slice(0,24) //.toLowerCase().slice(0,24).replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").replace(/\s+/g,"")
         console.log(oldVocab)
 
         let vocab = fs.readFileSync('../assets/text/vocabulary.md')
