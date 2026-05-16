@@ -402,7 +402,7 @@ client.on("messageCreate", async msg => {
 
         // if it's in the file already, removes it. pretty simple
         if (lines.includes(oldVocab)) {
-            fs.writeFileSync('../assets/text/vocabulary.md', vocab.toString().replace("\n" + oldVocab,""))
+            fs.writeFileSync('../assets/text/vocabulary.md', vocab.toString().replace("\n" + oldVocab + "\n","\n"))
             respond(msg, "i now DONT know the word \"" + oldVocab + "\"!!!", false, [])
         } else {
             respond(msg, "i dont know that word :​sob:, maybe teach it", false, [])
