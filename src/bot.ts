@@ -241,6 +241,11 @@ client.on("messageCreate", async msg => {
         respond(msg, (Number(msg.content) + 1) + "!!! :D", true, [])
     }
 
+    // :3
+    if (msg.content.endsWith(" :3") || msg.content.endsWith(" >:3") && get_opted(msg.author.id)) {
+        respond(msg, ":3", false, [])
+    }
+
 
 
 
