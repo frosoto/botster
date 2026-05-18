@@ -242,7 +242,7 @@ client.on("messageCreate", async msg => {
     }
 
     // :3
-    if (args[args.length] === ":3" || args[args.length] === ">:3" && get_opted(msg.author.id)) {
+    if (msg.content.endsWith(" :3") || msg.content.endsWith(" >:3") && get_opted(msg.author.id) || msg.content === ":3" || msg.content === ">:3") {
         respond(msg, ":3", false, [])
     }
 
