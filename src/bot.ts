@@ -235,6 +235,10 @@ client.on("messageCreate", async msg => {
         respond(msg, "heh... you're so welcome... B)", true, [])
     }
 
+    if (msg.content.toLowerCase().replace(/!.,?;:1234567890/g, "").replace(/\s/g,"").endsWith("sorrybotster")) {
+        respond(msg, "it's okay, im very forgivong!!! :D", true, [])
+    }
+
     // if message is just a number, botster will repeat but add 1 more
     if (Number(msg.content).toString() != "NaN" && get_opted(msg.author.id) && msg.content) {
         console.log(msg.content)
