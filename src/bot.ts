@@ -189,7 +189,7 @@ client.on("messageCreate", async msg => {
         console.log("Message received! " + msg.channel.id + " " + Date())
     }
     
-    if (msg.content.toLowerCase().endsWith("ing") && get_opted(msg.author.id) && !msg.content.toLowerCase().endsWith("thing")) {
+    if (msg.content.toLowerCase().endsWith("ing") && get_opted(msg.author.id) && !msg.content.toLowerCase().endsWith("thing") && msg.content.length < 101) {
         // if their message ends with "ing" (and NOT "thing") then it will interject with a classic botster message
         if (rng(1, 6) > 1 && msg.content.length <= 128) {
             // 1/6 chance to not respond, because gambling is great!! woo
@@ -206,14 +206,14 @@ client.on("messageCreate", async msg => {
     else if (msg.content.toLowerCase().replace(/\s/g, "") === "<@1471709531363872901>isthistrue") {
         // 50/50 chance 
         if (rng(1,2) === 1) {
-            respond(msg, "Hell, yeah! this is so " + (2 + 2 === 4), true, [msg.author.id])
+            respond(msg, "hells yeah, this is so #" + (2 + 2 === 4) + "!", true, [msg.author.id])
             if (msg.reference) {
                 (await msg.fetchReference()).react('✅')
             } else {
                 msg.react('✅')
             }
         } else {
-            respond(msg, "No ,! this is so " + (2 + 2 === 3), true, [msg.author.id])
+            respond(msg, "noo!! this is so " + (2 + 2 === 3) + "....", true, [msg.author.id])
             if (msg.reference) {
                 (await msg.fetchReference()).react('❌')
             } else {
