@@ -189,7 +189,8 @@ client.on("messageCreate", async msg => {
         console.log("Message received! " + msg.channel.id + " " + Date())
     }
     
-    if (msg.content.toLowerCase().endsWith("ing") && get_opted(msg.author.id) && !msg.content.toLowerCase().endsWith("thing") && msg.content.length < 101) {
+    if (msg.content.toLowerCase().endsWith("ing") && get_opted(msg.author.id) && !msg.content.toLowerCase().endsWith("thing") && !msg.content.toLowerCase().endsWith("content warning")
+        && msg.content.length < 101) {
         // if their message ends with "ing" (and NOT "thing") then it will interject with a classic botster message
         if (rng(1, 6) > 1 && msg.content.length <= 128) {
             // 1/6 chance to not respond, because gambling is great!! woo
