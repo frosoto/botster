@@ -501,8 +501,8 @@ client.on("messageCreate", async msg => {
     // ?meth <expression>: evaluates meth
     else if (args[0]?.toLowerCase() === "?meth" && msg.author != client.user) {
         let expression = msg.content.slice(5, msg.content.length)
-        let offset = Number(Math.floor(Math.random() * 1000) * 0.00001)
-        respond(msg, "your _        _ equals \"\"\"" + (Number(evaluate(expression)) + Number(offset)) + "\"\"\"\" !", false, [])
+        let offset = Number(Math.floor(Math.random() * 1000) * 0.00001) + Number(Math.floor(Math.random() * 100) * 0.1)
+        respond(msg, "your _    _ equals \"\"\"" + (Number(evaluate(expression)) + Number(offset)) + "\"\"\"\" !", false, [])
     }
     
     // ?opt<in/out>: opts you in or out
