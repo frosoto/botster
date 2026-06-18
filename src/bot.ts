@@ -232,7 +232,7 @@ client.on("messageCreate", async msg => {
         respond(msg, "OMG I'm such a big fan of " + args[0] + " " + args[1], true, [])
     }
 
-    if (msg.content.toLowerCase().replace(/!.,?;:1234567890/g,"").replace(/\s/g, "").endsWith("thegreatergood")) {
+    if (msg.content.toLowerCase().replace(/!.,?;:1234567890/g,"").replace(/\s/g, "").endsWith("thegreatergood") && get_opted(msg.author.id)) {
         respond(msg, "THE GREATER GOOD", false, [])
     }
 
