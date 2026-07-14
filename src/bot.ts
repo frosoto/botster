@@ -232,25 +232,25 @@ client.on("messageCreate", async msg => {
         respond(msg, "OMG I'm such a big fan of " + args[0] + " " + args[1], true, [])
     }
 
-    if (msg.content.toLowerCase().replace(/!.,?;:1234567890/g,"").replace(/\s/g, "").endsWith("thegreatergood") && get_opted(msg.author.id)) {
+    if (msg.content.toLowerCase().replaceAll(/['!.,?;:0-9\s]/g, "").endsWith("thegreatergood") && get_opted(msg.author.id)) {
         respond(msg, "THE GREATER GOOD", false, [])
     }
 
-    if (msg.content.toLowerCase().replace(/!.,?;:1234567890/g,"").replace(/\s/g, "") === "thanksbotster") {
+    if (msg.content.toLowerCase().replaceAll(/['!.,?;:0-9\s]/g, "") === "thanksbotster") {
         respond(msg, "heh... you're so welcome... B)", true, [])
     }
 
-    if (msg.content.toLowerCase().replace(/!.,?;:1234567890/g, "").replace(/\s/g,"").endsWith("sorrybotster")) {
+    if (msg.content.toLowerCase().replaceAll(/['!.,?;:0-9\s]/g, "").endsWith("sorrybotster")) {
         respond(msg, "it's okay, im very forgivong!!! :D", true, [])
     }
 
-    if (msg.content.toLowerCase().replace(/!.,?;:1234567890/g, "").replace(/\s/g,"").endsWith("yougetitbotster") ||
-        msg.content.toLowerCase().replace(/!.,?;:1234567890/g, "").replace(/\s/g,"").endsWith("yougetmebotster") ||
-        msg.content.toLowerCase().replace(/!.,?;:1234567890/g, "").replace(/\s/g,"").endsWith("botsteryouunderstand")) {
+    if (msg.content.toLowerCase().replaceAll(/['!.,?;:0-9\s]/g, "").endsWith("yougetitbotster") ||
+        msg.content.toLowerCase().replaceAll(/['!.,?;:0-9\s]/g, "").endsWith("yougetmebotster") ||
+        msg.content.toLowerCase().replaceAll(/['!.,?;:0-9\s]/g, "").endsWith("botsteryouunderstand")) {
         respond(msg, "i am cursed with knowledge", false, [])
     }
 
-    if (msg.content.toLowerCase().includes("giphy")) {
+    if (msg.content.toLowerCase().replaceAll(/['!.,?;:0-9\s]/g, "").includes("giphy")) {
         msg.react("🫂")
     }
 
