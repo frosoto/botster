@@ -250,6 +250,10 @@ client.on("messageCreate", async msg => {
         respond(msg, "i am cursed with knowledge", false, [])
     }
 
+    if (msg.content.toLowerCase().includes("giphy")) {
+        msg.react("🫂")
+    }
+
     // if message is just a number, botster will repeat but add 1 more
     if (Number(msg.content).toString() != "NaN" && get_opted(msg.author.id) && msg.content) {
         console.log(msg.content)
