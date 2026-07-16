@@ -254,6 +254,10 @@ client.on("messageCreate", async msg => {
         msg.react("🫂")
     }
 
+    if (msg.content.toLowerCase().replaceAll(/['!.,?;:0-9\s]/g, "").includes("dimmy")) {
+        msg.react("⚠️")
+    }
+
     // if message is just a number, botster will repeat but add 1 more
     if (Number(msg.content).toString() != "NaN" && get_opted(msg.author.id) && msg.content) {
         console.log(msg.content)
