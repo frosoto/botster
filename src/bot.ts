@@ -290,13 +290,13 @@ client.on("messageCreate", async msg => {
         }
     }
 
-    /* else if (args[0]?.toLowerCase() === "?leetsay" && msg.author != client.user) {
-        if (args[1] != null) {
-            respond(msg, msg.content.toUpperCase().replace('T','7').replace('B','8').replace('I','1').replace('S','5').replace('E','3').replace('A','4').replace('G','6').replace('O','0'), false, [])
+    else if (args[0]?.toLowerCase() === "?leetsay" && msg.author != client.user) {
+        if (args[1] != null && args[1] != "|") {
+            respond(msg, msg.content.slice(9, msg.content.length).toUpperCase().replace(/T/g,'7').replace(/B/g,'8').replace(/I/g,'1').replace(/S/g,'5').replace(/E/g,'3').replace(/A/g,'4').replace(/G/g,'6').replace(/O/g,'0'), false, [])
         } else if (args[1] === "|" && args[2] === "gibberish") {
-
+            respond(msg, gibberish("../assets/text/vocabulary.md", 1).toUpperCase().replace(/T/g,'7').replace(/B/g,'8').replace(/I/g,'1').replace(/S/g,'5').replace(/E/g,'3').replace(/A/g,'4').replace(/G/g,'6').replace(/O/g,'0'), false, [])
         }
-    } */
+    }
 
     // ?react <emoji> <msgID>: reacts to a specific message with a specific emoji. has to be sent in the same channel
     else if (args[0]?.toLowerCase() === "?react" && msg.author != client.user) {
@@ -383,6 +383,8 @@ client.on("messageCreate", async msg => {
                     // console.log(scrambledContent)
                 }
                 respond(msg, scrambledContent, true, [])
+            } else if (args[1] === "|" && args[2] === "?leetsay") {
+                respond(msg, gibberish("../assets/text/vocabulary.md", 1).toUpperCase().replace(/T/g,'7').replace(/B/g,'8').replace(/I/g,'1').replace(/S/g,'5').replace(/E/g,'3').replace(/A/g,'4').replace(/G/g,'6').replace(/O/g,'0'), false, [])
             } else {
                 // revolutionary feature where it continues your sentence with gibberish
                 respond(msg, msg.content.slice(11, msg.content.length).replace(/<gibber>/g, gibberish('../assets/text/vocabulary.md', 1).slice(1,-1))
