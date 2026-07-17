@@ -359,7 +359,7 @@ client.on("messageCreate", async msg => {
         } else if (args[1]) {
             if (args[1] === "|" && args[2] === "?unteach") {
                 // unteaches a random word, i love piping!!!
-                const gibber = gibberish('../assets/text/vocabulary.md', 1)
+                const gibber = gibberish('../assets/text/vocabulary.md', 1).trim()
                 const vocab = fs.readFileSync("../assets/text/vocabulary.md")
                 fs.writeFileSync('../assets/text/vocabulary.md', vocab.toString().replace("\n" + gibber,""))
                 respond(msg, "i now DONT know the word \"" + gibber + "\"!!!", false, [])
@@ -384,7 +384,7 @@ client.on("messageCreate", async msg => {
                 }
                 respond(msg, scrambledContent, true, [])
             } else if (args[1] === "|" && args[2] === "?leetsay") {
-                respond(msg, gibberish("../assets/text/vocabulary.md", 1).toUpperCase().replace(/T/g,'7').replace(/B/g,'8').replace(/I/g,'1').replace(/S/g,'5').replace(/E/g,'3').replace(/A/g,'4').replace(/G/g,'6').replace(/O/g,'0'), false, [])
+                respond(msg, gibberish("../assets/text/vocabulary.md", 1).trim().toUpperCase().replace(/T/g,'7').replace(/B/g,'8').replace(/I/g,'1').replace(/S/g,'5').replace(/E/g,'3').replace(/A/g,'4').replace(/G/g,'6').replace(/O/g,'0'), false, [])
             } else {
                 // revolutionary feature where it continues your sentence with gibberish
                 respond(msg, msg.content.slice(11, msg.content.length).replace(/<gibber>/g, gibberish('../assets/text/vocabulary.md', 1).slice(1,-1))
