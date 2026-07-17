@@ -537,7 +537,7 @@ client.on("messageCreate", async msg => {
         }
     }
 
-    else if (args[0]?.toLowerCase() === "?botster") {
+    else if (args[0]?.toLowerCase() === "?botster" && msg.author != client.user) {
         const pagination = new Pagination(msg)
             .setColor(0xBE1931)
             .setTitle('botster')
