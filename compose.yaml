@@ -1,0 +1,6 @@
+services:
+  botster:
+    build: .
+    restart: on-failure
+    environment:
+      TOKEN: ${TOKEN:?Set TOKEN in your environment or a .env file}
