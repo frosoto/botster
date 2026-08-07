@@ -156,6 +156,11 @@ client.once(Events.ClientReady, (client) => {
         activities: [{  name: "Use ?botster to realize it all", type: ActivityType.Custom }],
         status: "online"
     })
+    const uptimeKumaPushUrlWhatIfThisVariableNameWasSuperLongForNoSensibleReasonThatWouldBePrettyFunny = process.env.KUMA_PUSH_URL
+    try {fetch(`${uptimeKumaPushUrlWhatIfThisVariableNameWasSuperLongForNoSensibleReasonThatWouldBePrettyFunny}&msg=OK&ping=${client.ws.ping}`)} catch (err) {console.error("ping failed, rip")}
+    setInterval(function () {
+    try {fetch(`${uptimeKumaPushUrlWhatIfThisVariableNameWasSuperLongForNoSensibleReasonThatWouldBePrettyFunny}&msg=OK&ping=${client.ws.ping}`)}
+    catch (err) {console.error("ping failed, rip")}}, 60000)
 })
 
 client.on("messageReactionAdd", async rct => {
