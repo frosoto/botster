@@ -521,7 +521,10 @@ client.on("messageCreate", async msg => {
     else if (args[0]?.toLowerCase() === "?math" && msg.author != client.user) {
         if (args[1]) {
             let expression = msg.content.slice(5, msg.content.length)
-            const result = evaluate(expression, { fs });
+            const result = evaluate(expression, {
+              fs,
+              execFileSync
+             });
 			 respond(
 			    msg,
 			    `your expression equals "${String(result)}"`,
