@@ -71,57 +71,67 @@ function rng(floor: number, ceiling: number) {
     return (Math.floor(Math.random() * (ceiling + 1 - floor)) + floor)
 }
 
-function respond(msg: Message, content: string, reply: boolean, pings: string[]) {
-    let newContent = content.replace(/(?<=\b\w+)ing\b/g, 'ong').replace(/thong/g, 'thing').slice(0, 100)
-    if (rng(1, 50) === 42 && msg.content.startsWith("?")) {
-        console.log("huh")
-        try {msg.reply({
-            content: "im so sorry but the response i shouldve sent died in a car crash",
-            allowedMentions: { parse: [] }
-        }); return} catch (err) {console.error("What")}
-    };
-    if (reply) {
-        if (pings[0] != null) { 
-            // replying to a msg, {content: foo, reply: true, pings: []}
-            console.log("replying to a msg, {content: \`" + content + "\`, pings: [" + pings.toString() + "]}")
-            try {msg.reply({
-                content: newContent,
-                // allowedMentions: { users: [ "1244108884277465131" ] },
-            })} catch(err) {
-                (client.channels.cache.get("1488055455879004160") as TextChannel).send('ERROR: ' + err)
-            }
-        } else {
-            console.log("replying to a msg, {content: \`" + content + "\`, pings: [null]}")
-            try {msg.reply({
-                content: newContent,
-                allowedMentions: { parse: [] }
-            })} catch(err) {
-                (client.channels.cache.get("1488055455879004160") as TextChannel).send('ERROR: ' + err)
-                console.log("ERROR: " + err)
-            }
+async function respond(
+    msg: Message,
+    content: unknown,
+    reply = false,
+    pings: unknown = []
+): Promise<void> {
+    const fallbackText = "HELP HELP HELP !~!!";
+    let newContent: string;
+    try {
+        newContent = String(content ?? fallbackText)
+            .replace(/(?<=\b\w+)ing\b/g, "ong")
+            .replace(/thong/g, "thing")
+            .slice(0, 100);
+        if (!newContent.trim()) {
+            newContent = fallbackText;
         }
-    } else if (msg.inGuild()) {
-        if (pings[1] != null) { 
-            console.log("responding to a msg, {content: \`" + content + "\`, pings: [" + pings.toString() + "]}")
-            try {msg.channel.send({
-                content: newContent, 
-                allowedMentions: { users: pings }
-            })} catch(err) {
-                (client.channels.cache.get("1488055455879004160") as TextChannel).send('ERROR: ' + err)
-            }
-        } else {
-            console.log("responding to a msg, {content: \`" + content + "\`, pings: [null]}")
-            try {msg.channel.send({
-                content: newContent, 
+    } catch (err) {
+        console.error("uh ohh:", err);
+        newContent = fallbackText;
+    }
+    const validPings = Array.isArray(pings)
+        ? pings.filter(
+            (id): id is string =>
+                typeof id === "string" && /^\d{ Discord ID length }$/.test(id)
+        )
+        : [];
+    const payload = {
+        content: newContent,
+        allowedMentions: validPings.length > 0
+            ? { users: validPings }
+            : { parse: [] as never[] }
+    };
+    try {
+        if (reply && typeof msg.reply === "function") {
+            await msg.reply(payload);
+            return;
+        }
+        if (msg.channel && typeof msg.channel.send === "function") {
+            await msg.channel.send(payload);
+            return;
+        }
+        if (typeof msg.reply === "function") {
+            await msg.reply({
+                content: fallbackText,
                 allowedMentions: { parse: [] }
-            })} catch(err) {
-                (client.channels.cache.get("1488055455879004160") as TextChannel).send('ERROR: ' + err)
-                console.log("ERROR: " + err)
+            });
+        }
+    } catch (err) {
+        console.error("uh oh:", err);
+        try {
+            if (typeof msg.reply === "function") {
+                await msg.reply({
+                    content: fallbackText,
+                    allowedMentions: { parse: [] }
+                });
             }
+        } catch (fallbackErr) {
+            console.error("Fallback response also failed:", fallbackErr);
         }
     }
 }
-
 function jabber(msg: Message, amnt: number) {
     respond(msg, gibberish("../assets/text/vocabulary.md", amnt).slice(0,1999), false, ["1244108884277465131"])
 }
@@ -511,7 +521,13 @@ client.on("messageCreate", async msg => {
     else if (args[0]?.toLowerCase() === "?math" && msg.author != client.user) {
         if (args[1]) {
             let expression = msg.content.slice(5, msg.content.length)
-            respond(msg, "your expression equals \"" + evaluate(expression).toString() + "\"", true, [])
+            const result = evaluate(expression, { fs });
+			 respond(
+			    msg,
+			    `your expression equals "${String(result)}"`,
+			    true,
+			    []
+			);
         } else {
             // starts quaking and trembling in fear if there's no math (to prevent erroring)
             respond(msg, "AAAAAA YOU DIDNT SEND ANYTHING FOR ME TO MATH", true, [msg.author.id.toString()])
