@@ -2,8 +2,25 @@
 import { ChannelManager, Client, EmbedBuilder, Events, GatewayIntentBits, Message, Partials, TextChannel, ActivityType, ButtonStyle, ButtonBuilder, Options } from "discord.js";
 import fs from 'fs'; import path from 'path';
 import { Database } from "bun:sqlite";
-import { ceil, evaluate } from 'mathjs';
 import { Pagination } from 'pagination.djs';
+import { create, all } from 'mathjs'
+
+const math = create(all)
+const limitedEvaluate = math.evaluate
+
+math.import({
+  // most important (hardly any functional impact)
+  'import':     function () { throw new Error('Function import is disabled') },
+  'createUnit': function () { throw new Error('Function createUnit is disabled') },
+  'reviver':    function () { throw new Error('Function reviver is disabled') },
+
+  // extra (has functional impact)
+  'evaluate':   function () { throw new Error('Function evaluate is disabled') },
+  'parse':      function () { throw new Error('Function parse is disabled') },
+  'simplify':   function () { throw new Error('Function simplify is disabled') },
+  'derivative': function () { throw new Error('Function derivative is disabled') },
+  'resolve':    function () { throw new Error('Function resolve is disabled') },
+}, { override: true })
 
 console.log("Please let my code work, oh great Anders Hejlsberg (inventor of TypeScript)!")
 
@@ -511,7 +528,7 @@ client.on("messageCreate", async msg => {
     else if (args[0]?.toLowerCase() === "?math" && msg.author != client.user) {
         if (args[1]) {
             let expression = msg.content.slice(5, msg.content.length)
-            respond(msg, "your expression equals \"" + evaluate(expression).toString() + "\"", true, [])
+            respond(msg, "your expression equals \"" + limitedEvaluate(expression).toString() + "\"", true, [])
         } else {
             // starts quaking and trembling in fear if there's no math (to prevent erroring)
             respond(msg, "AAAAAA YOU DIDNT SEND ANYTHING FOR ME TO MATH", true, [msg.author.id.toString()])
@@ -521,7 +538,7 @@ client.on("messageCreate", async msg => {
     else if (args[0]?.toLowerCase() === "?meth" && msg.author != client.user) {
         let expression = msg.content.slice(5, msg.content.length)
         let offset = Number(Math.floor(Math.random() * 1000) * 0.00001) + Number(Math.floor(Math.random() * 100) * 0.1)
-        respond(msg, "your _    _ equals \"\"\"" + (Number(evaluate(expression)) + Number(offset)) + "\"\"\"\" !", false, [])
+        respond(msg, "your _    _ equals \"\"\"" + (Number(limitedEvaluate(expression)) + Number(offset)) + "\"\"\"\" !", false, [])
     }
     
     // ?opt<in/out>: opts you in or out
