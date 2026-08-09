@@ -1,5 +1,5 @@
 // import discord.js
-import { ChannelManager, Client, EmbedBuilder, Events, GatewayIntentBits, Message, Partials, TextChannel, ActivityType, ButtonStyle, ButtonBuilder, Options } from "discord.js";
+import { ChannelManager, Client, EmbedBuilder, Events, GatewayIntentBits, Message, Partials, TextChannel, ActivityType, ButtonStyle, ButtonBuilder, Options, PermissionFlagsBits } from "discord.js";
 import fs from 'fs'; import path from 'path';
 import { Database } from "bun:sqlite";
 import { ceil, evaluate } from 'mathjs';
@@ -124,6 +124,14 @@ function respond(msg: Message, content: string, reply: boolean, pings: string[])
 
 function jabber(msg: Message, amnt: number) {
     respond(msg, gibberish("../assets/text/vocabulary.md", amnt).slice(0,1999), false, ["1244108884277465131"])
+}
+
+function canModerate(msg: Message) {
+    return msg.inGuild() && msg.member?.permissions.has(PermissionFlagsBits.ModerateMembers)
+}
+
+function getMemberId(value: string | undefined) {
+    return value?.replace(/^<@!?(\d+)>$/, '$1')
 }
 
 // create a new Client instance
@@ -280,8 +288,96 @@ client.on("messageCreate", async msg => {
 
     } */
 
+    // /mod kick <user> [reason]: kicks a member from this server.
+    if (args[0]?.toLowerCase() === "/mod" && args[1]?.toLowerCase() === "kick" && msg.author != client.user) {
+        if (!canModerate(msg)) {
+            respond(msg, "you need the Moderate Members permission to use /mod commands", true, [])
+        } else {
+            const memberId = getMemberId(args[2])
+            const member = memberId && await msg.guild!.members.fetch(memberId).catch(() => null)
+            if (!member) {
+                respond(msg, "i couldnt find that member", true, [])
+            } else if (!member.kickable) {
+                respond(msg, "i cant kick that member", true, [])
+            } else {
+                await member.kick(args.slice(3).join(' ') || undefined)
+                respond(msg, "kicked " + member.user.tag, false, [])
+            }
+        }
+    }
+
+    // /mod ban <user> [reason]: bans a member from this server.
+    else if (args[0]?.toLowerCase() === "/mod" && args[1]?.toLowerCase() === "ban" && msg.author != client.user) {
+        if (!canModerate(msg)) {
+            respond(msg, "you need the Moderate Members permission to use /mod commands", true, [])
+        } else {
+            const memberId = getMemberId(args[2])
+            const member = memberId && await msg.guild!.members.fetch(memberId).catch(() => null)
+            if (!member) {
+                respond(msg, "i couldnt find that member", true, [])
+            } else if (!member.bannable) {
+                respond(msg, "i cant ban that member", true, [])
+            } else {
+                await member.ban({ reason: args.slice(3).join(' ') || undefined })
+                respond(msg, "banned " + member.user.tag, false, [])
+            }
+        }
+    }
+
+    // /mod announce <message>: announces in Botster's most recently used channel in every server.
+    else if (args[0]?.toLowerCase() === "/mod" && args[1]?.toLowerCase() === "announce" && msg.author != client.user) {
+        if (!canModerate(msg)) {
+            respond(msg, "you need the Moderate Members permission to use /mod commands", true, [])
+        } else {
+            const announcement = msg.content.slice("/mod announce".length).trim()
+            if (!announcement) {
+                respond(msg, "you need to give me something to announce", true, [])
+            } else {
+                let sent = 0
+                for (const guild of client.guilds.cache.values()) {
+                    const channel = guild.channels.cache
+                        .filter((channel): channel is TextChannel => channel instanceof TextChannel && channel.lastMessageId !== null)
+                        .sort((a, b) => String(b.lastMessageId).localeCompare(String(a.lastMessageId)))
+                        .first()
+                    if (channel) {
+                        try {
+                            await channel.send({ content: announcement, allowedMentions: { parse: [] } })
+                            sent++
+                        } catch (err) {
+                            console.error("Could not announce in " + guild.id, err)
+                        }
+                    }
+                }
+                respond(msg, "announced in " + sent + " server" + (sent === 1 ? "" : "s"), true, [])
+            }
+        }
+    }
+
+    // /mod invite: creates a permanent invite for this channel.
+    else if (args[0]?.toLowerCase() === "/mod" && args[1]?.toLowerCase() === "invite" && !args[2] && msg.author != client.user) {
+        if (!canModerate(msg)) {
+            respond(msg, "you need the Moderate Members permission to use /mod commands", true, [])
+        } else if (!msg.channel.isTextBased() || !('createInvite' in msg.channel)) {
+            respond(msg, "i cant create an invite for this channel", true, [])
+        } else {
+            const invite = await msg.channel.createInvite({ maxAge: 0, maxUses: 0, reason: "Created with /mod invite" })
+            respond(msg, invite.url, true, [])
+        }
+    }
+
+    // /mod invite pause/unpause: disables or restores all server invites.
+    else if (args[0]?.toLowerCase() === "/mod" && args[1]?.toLowerCase() === "invite" && (args[2]?.toLowerCase() === "pause" || args[2]?.toLowerCase() === "unpause") && msg.author != client.user) {
+        if (!canModerate(msg)) {
+            respond(msg, "you need the Moderate Members permission to use /mod commands", true, [])
+        } else {
+            const paused = args[2].toLowerCase() === "pause"
+            await msg.guild!.disableInvites(paused)
+            respond(msg, paused ? "server invites are now paused" : "server invites are now unpaused", true, [])
+        }
+    }
+
     // ?say <content>: Botster sends what you tell it to in its own message, excluding attached media.
-    if (args[0]?.toLowerCase() === "?say" && msg.author != client.user) {
+    else if (args[0]?.toLowerCase() === "?say" && msg.author != client.user) {
         // sends gibberish if they dont append an argument, to prevent "Erroring" (errors bad)
         if (args[1] != null) {
                 respond(msg, msg.content.slice(4, msg.content.length), false, [])
