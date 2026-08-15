@@ -100,7 +100,7 @@ async function respond(
         newContent = String(content ?? fallbackText)
             .replace(/(?<=\b\w+)ing\b/g, "ong")
             .replace(/thong/g, "thing")
-            .slice(0, 100);
+            .slice(0, 115);
         if (!newContent.trim()) {
             newContent = fallbackText;
         }
@@ -121,6 +121,14 @@ async function respond(
             : { parse: [] as never[] }
     };
     try {
+        if (rng(1, 50) === 42 && payload.content.startsWith("?") && typeof msg.reply === "function") {
+            await msg.reply({
+                content: "im so sorry but the response i shouldve sent died in a car crash",
+                allowedMentions: { parse: [] }
+            });
+            return;
+        }
+
         if (reply && typeof msg.reply === "function") {
             await msg.reply(payload);
             return;
