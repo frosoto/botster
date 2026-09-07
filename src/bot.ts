@@ -4,6 +4,7 @@ import fs from 'fs'; import path from 'path';
 import { Database } from "bun:sqlite";
 import { Pagination } from 'pagination.djs';
 import { create, all } from 'mathjs'
+import 'shore.js';
 
 const math = create(all)
 const limitedEvaluate = math.evaluate
