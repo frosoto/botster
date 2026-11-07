@@ -4,7 +4,6 @@ import fs from 'fs'; import path from 'path';
 import { Database } from "bun:sqlite";
 import { Pagination } from 'pagination.djs';
 import { create, all } from 'mathjs'
-import 'shore.js';
 
 const math = create(all)
 const limitedEvaluate = math.evaluate
@@ -14,6 +13,7 @@ math.import({
   'import':     function () { throw new Error('Function import is disabled') },
   'createUnit': function () { throw new Error('Function createUnit is disabled') },
   'reviver':    function () { throw new Error('Function reviver is disabled') },
+  'matrix':    function () { throw new Error('Function matrix is disabled') },
 
   // extra (has functional impact)
   'evaluate':   function () { throw new Error('Function evaluate is disabled') },
@@ -192,6 +192,7 @@ client.once(Events.ClientReady, (client) => {
         activities: [{  name: "Use ?botster to realize it all", type: ActivityType.Custom }],
         status: "online"
     })
+    return;
     const uptimeKumaPushUrlWhatIfThisVariableNameWasSuperLongForNoSensibleReasonThatWouldBePrettyFunny = process.env.KUMA_PUSH_URL
     try {fetch(`${uptimeKumaPushUrlWhatIfThisVariableNameWasSuperLongForNoSensibleReasonThatWouldBePrettyFunny}&msg=OK&ping=${client.ws.ping}`)} catch (err) {console.error("ping failed, rip")}
     setInterval(function () {
@@ -545,6 +546,8 @@ client.on("messageCreate", async msg => {
 
     // ?math <expression>: evaluates math, but it DOESN'T use eval() or anything so don't bother
     else if (args[0]?.toLowerCase() === "?math" && msg.author != client.user) {
+	    respond(msg, Math.random().toString(), true)
+	    return
         if (args[1]) {
             let expression = msg.content.slice(5, msg.content.length)
             respond(msg, "your expression equals \"" + limitedEvaluate(expression).toString() + "\"", true, [])
@@ -557,7 +560,7 @@ client.on("messageCreate", async msg => {
     else if (args[0]?.toLowerCase() === "?meth" && msg.author != client.user) {
         let expression = msg.content.slice(5, msg.content.length)
         let offset = Number(Math.floor(Math.random() * 1000) * 0.00001) + Number(Math.floor(Math.random() * 100) * 0.1)
-        respond(msg, "your _    _ equals \"\"\"" + (Number(limitedEvaluate(expression)) + Number(offset)) + "\"\"\"\" !", false, [])
+        respond(msg,  "\"\"" + offset + "! \"\"\"\"", false)
     }
     
     // ?opt<in/out>: opts you in or out
